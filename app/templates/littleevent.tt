@@ -1,1 +1,1 @@
-<div class="littleevent">[% event_row.name | html %]</div>
+<div class="littleevent" style="[% eventstyle %]"title="[% event_row.name %]">[% event_row.start_hour %] [% event_row.name | html %] ([% event_row.venue.name %])</div>

@@ -39,4 +39,12 @@ __PACKAGE__->set_primary_key('id');
 __PACKAGE__->belongs_to('venue', 'Event::Schema::Result::Venue', 'venue_id', { join_type => 'left'});
 __PACKAGE__->has_many('event_acts', 'Event::Schema::Result::ActEvents', 'event_id');
 
+sub start_hour {
+    my ($self) = @_;
+
+    return sprintf("%02d:%02d",
+                  $self->start_time->hour,
+                  $self->start_time->minute);
+}
+
 1;

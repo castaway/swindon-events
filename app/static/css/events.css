@@ -1,4 +1,9 @@
 .fc-content div {
+}
+
+.littleevent {
+    white-space: nowrap;
+    overflow: hidden;
     text-overflow: ellipsis;
     -o-text-overflow: ellipsis;
     -icab-text-overflow: ellipsis;
@@ -6,3 +11,4 @@
     -moz-text-overflow: ellipsis;
     -webkit-text-overflow: ellipsis; 
 }
+

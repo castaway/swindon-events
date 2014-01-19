@@ -69,33 +69,35 @@ sub get_homepage {
                                  day => 1,
         );
     
-    $start_date = $dtf->format_datetime($start_date);
-    $end_date = $dtf->format_datetime($end_date);
+    my $start = $dtf->format_datetime($start_date);
+    my $end = $dtf->format_datetime($end_date);
 
     my $events_rs = $schema->resultset('Event')->search({
-                                                            start_time => {-between => [$start_date, $end_date]},
+                                                            start_time => {-between => [$start, $end]},
                                                         },
                                                         {
                                                             prefetch => ['venue', { event_acts => 'act' }],
+                                                            order_by => [{ '-asc' => 'start_time' }],
                                                         });
     
     my %events;
 
     while (my $event_row = $events_rs->next) {
-        my $html;
-        $self->tt->process('littleevent.tt', {
-            event_row => $event_row
-                           },
-                           \$html
-            );
-        $events{$event_row->start_time->mdy} .= $html;
+        push @{$events{$event_row->start_time->dmy}}, { 
+            row => $event_row, 
+            date => $event_row->start_time,
+            ended => $event_row->start_time < DateTime->now,
+            today => $event_row->start_time->ymd eq DateTime->now->ymd,
+        };
     }
 
-    my $json = to_json(\%events) or die "Couldn't to_json?";
+#    my $json = to_json(\%events) or die "Couldn't to_json?";
 
     $self->tt->process('homepage.tt', {
         static_uri => $self->static_url,
-        initial_caldata_json => to_json(\%events)
+#        initial_caldata_json => to_json(\%events),
+        events => \%events,
+        start_date => $start_date,
                        }, \$output) || die $self->tt->error;
 
     print STDERR "Homepage: $output\n";
