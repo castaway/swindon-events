@@ -1,0 +1,1 @@
+<div class="littleevent">[% event_row.name | html %]</div>

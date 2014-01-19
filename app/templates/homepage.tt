@@ -1,0 +1,10 @@
+[% WRAPPER wrapper.tt %]
+    <div id="calendar" class="fc-calendar-container"></div>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+	<script type="text/javascript" src="[% static_uri %]/static/js/jquery.calendario.js"></script>
+<script type="text/javascript">
+initial_caldata = [% initial_caldata_json %]
+</script>
+    <script type="text/javascript" src="[% static_uri %]/static/js/events.js"</script>
+	<script type="text/javascript" src="[% static_uri %]/static/js/data.js"></script>
+[% END %]

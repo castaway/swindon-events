@@ -1,0 +1,151 @@
+14.01.2014:
+
+http://www.theocelot.co.uk/modules/extcal/month.php?year=2014&month=1&cat=2&county_id=62&town_id=5&venue_id=0
+* Does not contain Tap N Barrel, Castle etc, that only appear in Ken's Night Out
+
+https://www.hugecity.us/
+
+12.01.2014:
+more local events, add event type? ical per type, all or user choice?
+
+www.swindon.gov.uk/events/Pages/Events.aspx
+lower shaw farm?
+www.lowershawfarm.co.uk/events-calendar
+eventbrite, lanyrd, upcoming etc etc etc
+
+event aggregation, fn: https://www.hugecity.us/
+eventful.com/concerts?geo=city_id:440266
+
+www.discoveringbritain.org/walks/region/south-west-england/cotswold-canals.html
+
+Swindon music venues:
+* The Rolleston - https://www.facebook.com/pages/Status-Promotions-Live-Music-at-The-Rolleston/357999137646307?id=357999137646307&sk=events
+* The Vic - http://www.thevicswindon.com/get/main, https://www.facebook.com/pages/Green-Man-Music-Promotions/187343001292228?id=187343001292228&sk=events, https://www.facebook.com/groups/thevicswindon/events
+* Queen's Tap - https://www.facebook.com/pages/The-Queens-Tap-Swindon/161343323898027 (out of date), http://www.lemonrock.com/queenstap?page=gigs
+* Riffs Bar - http://www.riffsbar.com/gig-guide/, https://www.facebook.com/pages/Riffs-Bar/140297122681994?id=140297122681994&sk=events
+* Bakers Arms, Stratton? - https://www.facebook.com/pages/The-Bakers-Arms-Stratton/113168375396653
+* Beehive - http://www.bee-hive.co.uk/pfs.mhtml?eng_no=0&override=true&mode=search&count-num=110376
+* Castle - https://www.facebook.com/thecastleswindon - Ken Knightouts magazine (fb page not the pub owner?)
+* Baker Street - https://www.facebook.com/bakerstreetswindon, ilovebakerstreet.com, https://twitter.com/BakerStreetSwin - no events lists?
+* Kings - http://www.20atthekings.co.uk/events.htm
+* Merlin - https://www.facebook.com/MerlinPub
+* Roaring Donkey - https://www.facebook.com/photo.php?fbid=333222343484792&set=a.312183182255375.1073741825.167439900063038&type=1&theater
+* Wheatsheaf, Stratton - https://www.facebook.com/pages/The-Wheatsheaf/156351587716108
+* Byrons - https://www.facebook.com/pages/Byrons-Wine-Bar/291718187603335?fref=ts, 
+* Royal Oak - http://www.theroyaloakswindon.co.uk/, https://www.facebook.com/royal.oak.779/events
+* Tap & Barrel - http://www.thetapandbarrel.co.uk/events, https://www.facebook.com/tapn.barrelswindon?fref=ts - Ken Knightouts magazine - person
+* Town Gardens - http://www.swindon.gov.uk/lc/lc-arts/Pages/lc-arts-oldtownbowl.aspx, https://www.facebook.com/bowlconcerts
+* MECA - http://www.mecaswindon.co.uk/whats-on-meca-swindon.aspx, facebook.com/swindonmeca
+* Wyvern - https://www.facebook.com/WyvernTheatre?fref=ts, https://www.wyverntheatre.org.uk/Online/whatson?menu_id=3239D7DE-2D9C-40D7-A898-7CBD1FEE12E8&sToken=1%2C4ed1f208%2C52c73b5a%2C49622C61-10C7-4E17-894C-3C0EAF033CCA%2Clh3ZG1tMR%2FeSYrqG9lRCJeN80rA%3D
+* Arts Centre - http://www.swindon.gov.uk/events/pages/eventslisting.aspx?v=Arts%20Centre
+* The Crown - http://www.thecrownatstratton.co.uk/, https://www.facebook.com/crowninn.stratton?fref=ts - person
+* GW Swindon (GW Acoustic Showcase)
+* New Inn - ?? https://www.facebook.com/royal.oak.779/events - person
+* Swiss Chalet - https://www.facebook.com/swisschalet.gorsehill?fref=ts - ken knightout - person 
+* The Haydon (Wick) Club?
+* The Woodlands Edge - http://www.swindonweb.com/event/?m=40&c=10185&v=48&t=Live+Music+at+Woodlands+Edge, http://www.hungryhorse.co.uk/pubs/woodlands-edge-swindon
+* The Greyhound  - https://www.facebook.com/thegreyhoundpubswindon?fref=ts, https://www.facebook.com/GreyhoundPubSwindon?fref=ts  on Ken Knightouts magazine
+* Carters Rest, Wroughton - https://www.facebook.com/events/630079440382546/?ref=ts&fref=ts
+* Goldfinger Tavern, Highworth - https://www.facebook.com/goldfingertavern?fref=ts
+* The Windmill, Swindon - http://www.gkmeetandeat.co.uk/locations/windmill-freshbrook, 
+* The Sun Inn - https://www.facebook.com/suninn.coate.5/events
+* The Village Tavern - https://www.facebook.com/thetoothillvillagetavern/events
+* The Plough Inn, Old town - http://www.theplougholdtown.co.uk/jazz_events.htm
+* Brookhouse farm - https://www.facebook.com/brookhouse.farm/events - 421347267969378
+* The Venue, havelock sq.
+
+* sources
+** swindontickets
+** seetickets
+** ents24
+** Green man music promotions - https://www.facebook.com/pages/Green-Man-Music-Promotions/187343001292228?fref=ts, http://greenmanbsp.wordpress.com/
+** Sheermusuic - http://sheermusic.wordpress.com/gigs-list/, https://www.facebook.com/groups/204273396004/?fref=ts, https://www.facebook.com/groups/204273396004/events/
+* Ocelot - theocelot.co.uk, https://www.facebook.com/ocelot.mag, http://www.theocelot.co.uk/modules/extcal/month.php?year=2014&month=1&cat=2&county_id=62&town_id=5&venue_id=0
+* allgigs - http://www.allgigs.co.uk/whats_on/Swindon/
+* Dave Knight - http://swindonjazz.blogspot.co.uk/
+* SongKick - http://www.songkick.com/metro_areas/24556-uk-swindon
+* http://www.entertainmentswindon.co.uk/ ?
+* Acoustic Sessions - https://www.facebook.com/groups/645665972118589/?fref=ts
+* Swindon Link - http://www.swindonlink.com/tags/live_music_swindon
+* gatehouse studios - https://www.facebook.com/TheGatehousestudios?ref=stream&hc_location=stream
+* reverbnation - http://www.reverbnation.com/main/search?filter_type=artist&q=&use_postal_code=0&geo=Local&country=UK&state=&city=swindon&postal_code=&filter_genre=&sort=relevance
+* https://www.facebook.com/andrewjamespett/events
+* https://www.facebook.com/knightout.swindon?fref=ts
+
+
+* Acts
+** David Marx and the AK-Poets - http://akpoets.weebly.com/upcoming-gigs.html, https://www.facebook.com/pages/The-AK-Poets/118160368242312 - DONE
+** Batteleurs - http://www.bateleurs.co.uk/live.html
+** Miss Rosie - http://www.missinrosie.co.uk/gig-guide, http://www.missinrosie.co.uk/gig-guide
+** Rumour Shed - https://www.facebook.com/rumourshed?fref=ts 
+** Timid Deer (?) - https://soundcloud.com/timiddeer
+** Jim Blair / band Hip Route - http://www.reverbnation.com/hiproute, https://www.facebook.com/pages/Hip-Route/6224999386?fref=ts, https://www.facebook.com/pages/Hip-Route/6224999386?id=6224999386&ref=ts&sk=events - DONE
+** Faye Rogers (?) - https://www.facebook.com/fayelaura7
+** Ode & the Bebops - http://www.skiffleband.org.uk/gig_list.html
+** Ells - http://ells.biz/gigs/
+** Shepherd's Pie (heavy rock) - http://www.shepherdspierock.co.uk/gigs
+** Shred - http://shredband.webs.com/, http://darrenhuntsolo.webs.com/, http://darrenhuntsolo.webs.com/gigs-2014, https://www.facebook.com/ShredBand?fref=ts
+** Built for Comfort (Blues) - http://www.builtforcomfortbluesband.co.uk/
+** Hyperbolics - https://www.facebook.com/pages/The-Hyperbolics/116939518343253
+** Breeze - http://www.breezerock.com/
+** Gaz Brookfield (Bristol) - http://gazbrookfield.com/gigs.php
+** No Middle Ground (Covers) - http://www.nomiddleground.co.uk/
+** Switch - http://www.thebandswitch.co.uk/shows/
+** Drew Bryant - http://www.reverbnation.com/drewbryant
+** The Nomarks - https://www.facebook.com/TheNomarks # 134801383238517
+** George Andrews - DJ - https://www.facebook.com/george.andrews.9085
+** Chris O'Leary, Liam Leary - https://www.facebook.com/chrisjohnoleary
+** Switch - https://www.facebook.com/thebandSwitch/events, https://www.facebook.com/thebandSwitch/app_123966167614127 (bandsintown)
+** Colour the Atlas - https://www.facebook.com/colourtheatlas?fref=ts, twitter.com/colourtheatlas
+** Ben Maggs - https://www.facebook.com/benmaggsmusic?fref=ts, https://www.facebook.com/benmaggsmusic?
+** GReat Nothing - http://greatnothing.co.uk/
+** Darren Hunt - http://darrenhuntsolo.webs.com/gigs-2014, https://www.facebook.com/darren.hunt.90
+
+* Ethemia (Glos) https://www.facebook.com/Ethemia/events
+* http://www.pubtrail.co.uk/wiltshire.html
+
+
+* list:
+** January 01, The Bakers Arms, Stratton. David Marx & The AK-Poets
+** January 03, The Rolleston. David Marx & The AK-Poets
+** January 03, The Riffs Bar. Acoustic Sessions, Darren Hodge & Adam Sweet.
+** January 03, The Victoria. Pirate Joe, Jimmy Moore, Zackie Chan
+** January 10, Royal Oak, Old Town. Switch
+** January 11, The Rolleston. Sherpherd's Pie
+** January 11, The Castle. David Marx & The AK-Poets
+** January 15, The Crown. Bataleurs
+** January 18, The Merlin. David Marx & The AK-Poets
+** January 21, Baker Street. Ant Law
+** January 22, The Roaring Donkey. David Marx & The AK-Poets
+** January 23, The Wheatsheaf, Swindon. David Marx & The AK-Poets
+** January 25, Swiss Chalet. Switch
+** January 31, The Beehive, Swindon. David Marx & The AK-Poets
+** February 01, Byrons, Swindon. David Marx & The AK-Poets
+** February 02, Hotel 20, Wood St. Switch
+** February 07 The New Inn. Switch
+** March 01, The New Inn. Shepherd's Pie
+
+** Facebook search:
+/search?q=musician/band&type=place&limit=25&center=51.56,-1.78&distance=500
+
+* SURVEYS
+** Venues, Promoters and Acts
+* Do you have your own website which lists the gigs you are putting on?
+* Do you create Facebook events for your gigs?
+* Do you promote your gigs in any magazines?
+* Do you promote your gigs on any other websites?
+** List? Songkick, ents24, ... 
+
+** Customers, Users, Listeners
+* Do you listen to live music acts at more than one venue?
+* Do you regularly attend one venue?
+* Do you (just) listen to whatever live acts are on at your favorite venue?
+* Do you follow any particular acts, that is go to see them wherever they are on locally?
+
+***
+
+gigsnearme.co.uk ?
+musicnearme ? livemusicnearme ?
+gigsnear.me.uk ?
+
+http://tympanus.net/codrops/2012/11/27/calendario-a-flexible-calendar-plugin/
