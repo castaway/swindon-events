@@ -7,13 +7,17 @@ use Template;
 use Path::Class;
 use Config::General;
 use Web::Simple;
+use Data::ICal;
+use Data::ICal::Entry::Event;
+use Date::ICal;
 
 use lib '/mnt/shared/projects/events/scrapers/lib';
-use Event::Schema;
+use lib '/usr/src/perl/pubboards/lib';
+use PubBoards::Schema;
 
 has 'app_cwd' => ( is => 'ro', default => sub {'/mnt/shared/projects/events/app/'});
 #has 'static_url' => ( is => 'ro', default => sub {'http://192.168.42.2:7778'});
-has 'static_url' => ( is => 'ro', default => sub {'http://desert-island.me.uk/events'});
+has 'static_url' => ( is => 'ro', default => sub {'http://desert-island.me.uk/events/static'});
 has 'tt' => (is => 'ro', lazy => 1, builder => '_build_tt');
 has 'config' => (is => 'ro',
                  lazy => 1,
@@ -32,7 +36,7 @@ has 'schema' => (is => 'ro',
 
                      print "Trying to connect to dsn $dsn\n";
 
-                     Event::Schema->connect($dsn);
+                     PubBoards::Schema->connect($dsn);
                  });
 
 sub _build_tt {
@@ -49,7 +53,38 @@ sub dispatch_request {
     sub (GET + /) {
         print STDERR "Index page\n";
         return [ 200, [ 'Content-type', 'text/html' ], [ $self->get_homepage ] ];
+    },
+    sub (GET + /ical) {
+        print STDERR "ICAL of events\n";
+        return [ 200, [ 'Content-type', 'text/calendar' ], [ $self->get_ical ] ];
     }
+}
+
+sub get_ical {
+    my ($self) = @_;
+
+    my $ical = Data::ICal->new();
+
+    my $events_rs = $self->schema->resultset('Event')->search(
+        { start_time => { "!=" => undef }}, 
+        { prefetch => 'venue' }
+        );
+    while (my $event = $events_rs->next) {
+        my $ical_event = Data::ICal::Entry::Event->new();
+        $ical_event->add_properties(
+            summary => $event->name,
+            description => $event->description,
+            ( $event->venue ? (location => join(' ', $event->venue->name, $event->venue->address)) : ()),
+            ## geo data is bork! it backslashes the semi-colon
+#            ( $event->venue && $event->venue->latitude ? (geo => join(";", ($event->venue->latitude, $event->venue->longitude))) : () ),
+            ( $event->url ? (url => $event->url) : () ),
+            dtstart => Date::ICal->new( epoch => $event->start_time->epoch)->ical,
+#            ($dates[1] ? (dtend => Date::ICal->new( epoch => $dates[1])->ical) : () ),
+            );
+         
+        $ical->add_entry($ical_event);
+    }
+    return $ical->as_string;
 }
 
 sub get_homepage {

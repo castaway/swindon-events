@@ -25,7 +25,8 @@ __PACKAGE__->add_columns(
         is_nullable => 1,
     },
     venue_id => {
-        data_type => 'integer',
+        data_type => 'varchar',
+        size => 255,
         is_nullable => 1,
     },
     url => {

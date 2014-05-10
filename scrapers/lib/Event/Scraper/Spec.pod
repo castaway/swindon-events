@@ -1,0 +1,73 @@
+=item __PACKAGE__->get_events({...})
+
+Takes a hashref of whatever is in the config file.  Returns an arrayref of events.
+
+Each event is a hashref, with keys...
+
+=item event_desc
+
+A long description of the event
+
+=item event_id
+
+The id of the event, in the form of a uri.  Feel free to make up a schema that represents this source.
+
+=item event_url
+
+A URL that mere mortals can be linked to representing *this* event.
+
+=item event_name
+
+A short name for the event.
+
+=item owner_id
+
+The id of the person/organisation that created this event on the site that is being scraped.  Probably uses the same schema as the event_id.
+
+=item owner_name
+
+Human-readable name for the same entity as the owner_id.
+
+=item start_time
+
+The date & time (if known) that this event begins, as a DateTime object.
+
+=item tz_hint
+
+A hit about the timezone that will be in effect at the time of the event at the venue.
+
+FIXME: This was my idea, over Jess's exception, in the first place, and now I'm not sure about it myself.
+
+=item updated_time
+
+The last time we noticed the information about this event changing.
+
+=item venue
+
+Information about the venue the event will be at.  FIXME: This is a hashref in it's own right, document it properly.
+
+=over
+
+=item name
+
+Human-readable name of the venue.
+
+=item id
+
+Optional string representing venue id, if available (if not we'll use "eventy:$count+1"
+
+=item latitude
+
+Latitude of venue location
+
+=item longitude
+
+Longitude of venue location
+
+=item street,city,zip,country
+
+Optional Venue address in appropriate fields.
+
+=back
+
+=back

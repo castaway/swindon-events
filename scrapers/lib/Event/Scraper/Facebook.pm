@@ -3,6 +3,7 @@ use strictures 1;
 use Facebook::Graph;
 use DateTime;
 use DateTime::Format::ISO8601;
+use feature 'state';
 use Data::Dump::Streamer 'Dump', 'Dumper';
 $|=1;
 
@@ -27,11 +28,11 @@ sub get_events {
 
     # Then, copy-and-paste the access_token in.
 
-    print "Auth uri: ", $fbg->authorize->uri_as_string, "\n";
+    #print "Auth uri: ", $fbg->authorize->uri_as_string, "\n";
+# http://desert-island.me.uk/this-will-404/?code=AQBdFQHI10zquwfKzVRZhc41XuIhDbCcpedIGVM6U3q8Cn0cp-r4j6dhNJrMqQ73vZb4kaTrGgK6XowlLOcp3dMrQhDxEbTOT5UYPSRK-M1nfrJQDrySnV3YHUHRm1dQ6FY_XQe5O2RuyOJXuLcu7UpzwFK_t3F_PzXFdrnYLOJ_hNtD-QK8Erso1nFSUzPkk6u2WiEm17apIbHNimpjMmFhVFxmhNUv4LfUOO6GYLFmmBI0UQ3q7RuvS377C8YUmD19K_WZCpQumzvTdPMG0YDX3owb67HdzcB9LrP1uFcQEXlHJDT_zJGq8QS421OyarE#_=_
+    #$fbg->request_access_token('AQBdFQHI10zquwfKzVRZhc41XuIhDbCcpedIGVM6U3q8Cn0cp-r4j6dhNJrMqQ73vZb4kaTrGgK6XowlLOcp3dMrQhDxEbTOT5UYPSRK-M1nfrJQDrySnV3YHUHRm1dQ6FY_XQe5O2RuyOJXuLcu7UpzwFK_t3F_PzXFdrnYLOJ_hNtD-QK8Erso1nFSUzPkk6u2WiEm17apIbHNimpjMmFhVFxmhNUv4LfUOO6GYLFmmBI0UQ3q7RuvS377C8YUmD19K_WZCpQumzvTdPMG0YDX3owb67HdzcB9LrP1uFcQEXlHJDT_zJGq8QS421OyarE');
 
-#    $fbg->request_access_token('AQBie2XH5nlQ4vSnXdXrZNpb45M1ujG7dgEvaYzGSOjnIE0WCh8QQ-3h4BYFjmtZpOMfXkLxUPTO-OjfT2Y9KaaHOQWGe-0SbYS5s3d9L-VPYvlV2WWw-3r9c8LeQS374cosvexj0PodDD9fLALjB710YvKdFy7HLkut-zuJb1MBUnRvIVEp8joi7Cudjl7bHNt7Fe6hzdfYf5XL7jhjREmQbFYWpfncPUoOk8vwBXFvqLbtzw-KWE9cQ6Tu5my17RY_Nu6zAp_8-o1HxD7iZEtrJmUtCprhcx-4DtDB_Ayt7XyDjzxlEdgA6ltAbYz7XFo');
-
-    $fbg->access_token('CAAIGb948uZAwBADA4LeAwOcAzWnNZAG9hxkNJKSp9StJzfVEkTJ1S02QqbJhKb1nZAcJPDIxgHTfjke47mGkk0U2F91ON7C8MJMPty23Sq1GTFpcNSZAPq5sKCTu3PCLjNR1zmBENZAaSisZAU4ErcxKUT2sIRuFfPg4jdFirIPcrEkuXTUWoO');
+    $fbg->access_token('CAAIGb948uZAwBAMWbtHcsMKUoPEtm3ph58lcJ0MZBcaccoOyyoAtVQgVpwZAXt41nl6ZAVmoQ0rZBr9U1x0aayIQyKI6O3vlfXk6Geo1YJyZAOukj0dKhN9zAGOk32gUI1u4e0vya7pZBBqY0gmCqiFlo76eZBM2f2ZC5QnhAZAuLloMOSZA2EfxHmlccizt5tpZCUQZD');
 
     #Dump $fbg;
   }
@@ -63,28 +64,37 @@ sub get_events {
 sub expand_event {
   my ($self, $event_id) = @_;
 
+  state $today = DateTime->now();
   print "eid: $event_id\n";
 
   my $ret = {};
   my $fb_event = $fbg->query->find($event_id)->request->as_hashref;
 #  print "From FB: ", Dumper($fb_event);
 
-  $ret->{event_desc} = $fb_event->{description};
-  $ret->{event_id} = "fb:" . $event_id;
-  $ret->{event_url} = "https://www.facebook.com/" . $event_id;
-  $ret->{venue_name} = $fb_event->{location};
-  $ret->{event_name} = $fb_event->{name};
-  $ret->{owner_id} = "fb:" . $fb_event->{owner}{id};
-  $ret->{owner_name} = $fb_event->{owner}{name};
   my $st = $fb_event->{start_time};
   $st =~ s{\+\d{4}$}{};
   $ret->{start_time} = DateTime::Format::ISO8601->parse_datetime($st);
+  if($ret->{start_time} < $today) {
+      return ();
+  }
+  if(!$fb_event->{location} || $fb_event->{location} eq 'Swindon') {
+      warn "Can't figure out location of event: $event_id";
+      return ();
+  }
+
+  $ret->{event_desc} = $fb_event->{description};
+  $ret->{event_id} = "fb:" . $event_id;
+  $ret->{event_url} = "https://www.facebook.com/" . $event_id;
+  $ret->{event_name} = $fb_event->{name};
+  $ret->{owner_id} = "fb:" . $fb_event->{owner}{id};
+  $ret->{owner_name} = $fb_event->{owner}{name};
   $ret->{tz_hint} = $fb_event->{timezone};
   my $ut = $fb_event->{start_time};
   $ut =~ s{\+\d{4}$}{};
   $ret->{updated_time} = DateTime::Format::ISO8601->parse_datetime($ut);
+  
   $ret->{venue_loc} = $fb_event->{venue};
-  $ret->{venue_loc}{name} = $ret->{venue_name};
+  $ret->{venue_loc}{name} = $fb_event->{location};
 
 #  print "expanded: ", Dumper($ret);
 

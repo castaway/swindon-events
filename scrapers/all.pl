@@ -13,7 +13,8 @@ use Data::Dumper;
 use Config::General;
 use Module::Find;
 use lib 'lib';
-use Event::Schema;
+use lib '/usr/src/perl/pubboards/lib';
+use PubBoards::Schema;
 
 ## Config
 my $conf = Config::General->new("events.conf");
@@ -27,7 +28,7 @@ my %plugins = map { my $name = $_; $name =~ s{Event::Scraper::}{}; ( $name => $_
 print Dumper \%plugins;
 
 ## Database
-my $schema = Event::Schema->connect("dbi:$config{Setup}{dbi}:$config{Setup}{dbfile}");
+my $schema = PubBoards::Schema->connect("dbi:$config{Setup}{dbi}:$config{Setup}{dbfile}");
 if(!-f $config{Setup}{dbfile}) {
     $schema->deploy();
 }
@@ -40,6 +41,7 @@ foreach my $source (@{$config{Source}}) {
         next;
     }
 
+#    next if $source->{plugin} eq 'Facebook';
     next if $source->{plugin} eq 'Facebook' && $source->{page_id} =~ /\D/;
     my $events = $plugin->get_events($source);
 
@@ -68,19 +70,25 @@ foreach my $source (@{$config{Source}}) {
             $next_venue_id = $schema->resultset('Venue')->count + 1;
             $next_venue_id = "eventy:$next_venue_id";
         }
-        my $venue = $schema->resultset('Venue')->find_or_new({
-            name => $venue_data->{name},
-            ( $venue_data->{id} ? ( id => $venue_data->{id} ) : () )
-                                                             });
+        my $venue;
+        if(defined $venue_data->{name}) {
+            $venue = $schema->resultset('Venue')->find_or_new({
+                name => $venue_data->{name},
+                ( $venue_data->{id} ? ( id => $venue_data->{id} ) : () ),
+                                                              });
+        }
         my $db_event;
         my $event_data = {
             id => $event->{event_id},
             name => $event->{event_name},
             description => $event->{event_desc},
-            start_time => $event->{start_time},
+            ## moved to Time
+#            start_time => $event->{start_time},
             url => $event->{event_url},
         };
-        if(!$venue->in_storage) {
+        $event->{times} = [ { start => $event->{start_time}, end => undef} ]
+            if(!$event->{times} && $event->{start_time});
+        if($venue && !$venue->in_storage) {
             ## This oughta be something more sane
             $venue->last_verified(DateTime->now());
             if(!$venue->id) {
@@ -88,16 +96,22 @@ foreach my $source (@{$config{Source}}) {
             }
             $venue->latitude($venue_data->{latitude});
             $venue->longitude($venue_data->{longitude});
-            $venue->address(join(", ", ( map { $venue_data->{$_} }
+            $venue->address(join(", ", ( map { $venue_data->{$_} || () }
                                          (qw/street city zip country/)
                                  )));
             $venue->insert;
             $db_event = $venue->create_related('events', $event_data);
         } else {
             my $dtp = $schema->storage->datetime_parser;
-            $db_event = $venue->events->find_or_new({
-                start_time => $dtp->format_datetime($event->{start_time}),
+            if($venue) {
+                $db_event = $venue->events->find_or_new({
+                    start_time => $dtp->format_datetime($event->{start_time}),
                                                     });
+            } else {
+                $db_event = $schema->resultset('Event')->find_or_new({
+                    start_time => $dtp->format_datetime($event->{start_time}),
+                                                                     });
+            }
             if(!$db_event->in_storage) {
                 $db_event->id($event->{event_id});
                 $db_event->name($event->{event_name});
