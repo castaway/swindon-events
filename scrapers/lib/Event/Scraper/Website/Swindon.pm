@@ -3,6 +3,9 @@ package Event::Scraper::Website::Swindon;
 use strict;
 use warnings;
 
+use Text::Unidecode;
+## For those moments when an apostrophe turns out to be U+2019 RIGHT
+## SINGLE QUOTATION MARK ...
 sub venues {
     my $known_venues = {
         '<unknown>' => {
@@ -11,6 +14,42 @@ sub venues {
             city => 'Swindon',
             zip => '<Missing>',
             country => 'United Kingdom',
+            other_names => [],
+        },
+        'Moulden Hill Country Park' => {
+            name => 'Moulden Hill Country Park',
+            street => '<Missing>',
+            city => 'Swindon',
+            zip => '<Missing>',
+            country => 'United Kingdom',
+            other_names => ['Moulden Hill','Mouldon Hill'],
+            flags => {
+                is_outside => 1,
+            },
+        },
+        'Barbury Castle' => {
+            name => 'Barbury Castle',
+            street => 'The Ridgeway Trail',
+            city => 'Swindon',
+            zip => 'SN4 0QT',
+            country => 'United Kingdom',
+#            other_names => [],
+            flags => {
+                is_outside => 1,
+                has_food => 1,
+                has_tea_and_coffee => 1,
+            },
+        },
+        "Queen's Park" => {
+            name => "Queen's Park",
+            street => 'Drove Road',
+            city => 'Swindon',
+            zip => 'SN1',
+            country => 'United Kingdom',
+#            other_names => [],
+            flags => {
+                is_outside => 1,
+            },
         },
         'Arts Centre' => {
             name => 'Swindon Arts Centre',
@@ -20,6 +59,24 @@ sub venues {
             city => 'Swindon',
             zip => 'SN1 4BJ',
             country => 'United Kingdom',
+            flags => {
+                has_food => 1,
+                has_tea_and_coffee => 1,
+                has_wifi => 1,
+            },
+        },
+        'Town Gardens Bandstand' => {
+            name => 'Old Town Gardens Bandstand',
+            latitude => 51.55105,
+            longitude => -1.78219,
+            street => 'Quarry Road',
+            city => 'Swindon',
+            zip => 'SN1 4PP',
+            country => 'United Kingdom',
+            other_names => ['Town Gardens Band Stand'],
+            flags => {
+                is_outside => 1,
+            },
         },
         'Town Gardens' => {
             name => 'Old Town Gardens Bowl',
@@ -29,6 +86,9 @@ sub venues {
             city => 'Swindon',
             zip => 'SN1 4PP',
             country => 'United Kingdom',
+            flags => {
+                is_outside => 1,
+            },
         },
         'Central Library' => {
             name => 'Swindon Central Library',
@@ -38,6 +98,11 @@ sub venues {
             city => 'Swindon',
             zip => 'SN1 1QG',
             country => 'United Kingdom',
+            flags => {
+                has_food => 1,
+                has_tea_and_coffee => 1,
+                has_wifi => 1,
+            },
         },
         'Swindon Museum and Art Gallery' => {
             name => 'Swindon Museum and Art Gallery',
@@ -58,6 +123,10 @@ sub venues {
             zip => 'SN2 2TA',
             country => 'United Kingdom',
             other_names => ['STEAM'],
+            flags => {
+                has_food => 1,
+                has_tea_and_coffee => 1,
+            },
         },
         'Lydiard House and Park' => {
             name => 'Lydiard House and Park',
@@ -69,6 +138,11 @@ sub venues {
             zip => 'SN5 3PA',
             country => 'United Kingdom',
             other_names => ['Lydiard House'],
+            flags => {
+                has_food => 1,
+                has_tea_and_coffee => 1,
+                is_outside => 1,
+            },
         },
         'Coate Water' => {
             name => 'Coate Water Country Park',
@@ -79,6 +153,11 @@ sub venues {
             city => 'Swindon',
             zip => 'SN3 6AA',
             country => 'United Kingdom',
+            flags => {
+                has_food => 1,
+                has_tea_and_coffee => 1,
+                is_outside => 1,
+            },
         },
         'Croft Leisure Centre' => {
             name => 'Croft Leisure Centre',
@@ -100,6 +179,9 @@ sub venues {
             city => 'Swindon',
             zip => 'SN1 3EN',
             country => 'United Kingdom',
+            flags => {
+                is_outside => 1,
+            },
         },
         'Lower Shaw Farm' => {
             latitude => 51.56972,
@@ -107,7 +189,7 @@ sub venues {
             name => 'Lower Shaw Farm',
             street => 'Old Shaw Lane',
             city => 'Swindon',
-            zip => ' SN5 5PJ',
+            zip => 'SN5 5PJ',
             country => 'United Kingdom',
         },
         'Richard Jefferies Museum' => {
@@ -119,6 +201,10 @@ sub venues {
             city => 'Swindon',
             zip => 'SN3 6AA',
             country => 'United Kingdom',
+            flags => {
+                has_food => 1,
+                has_tea_and_coffee => 1,
+            },
         },
         'Highworth Library' => {
             # Highworth Library Brewery Street SN6 7AJ
@@ -140,6 +226,11 @@ sub venues {
             zip => 'SN1 4BJ',
             country => 'United Kingdom',
             other_names => ['Cakes and Ale'],
+            flags => {
+                has_food => 1,
+                has_tea_and_coffee => 1,
+                has_wifi => 1,
+            },
         },
         'Wroughton Library' => {
             # Wroughton Library, Ellendune Centre SN4 9LT
@@ -162,20 +253,77 @@ sub venues {
             country => 'United Kingdom',
             other_names => ['Town Hall'],
         },
+        'Stanton Park' => {
+#            latitude => 51.5585746,
+#            longitude => -1.7814805,
+            street => 'The Ave, Stanton Fitzwarren',
+            name => 'Stanton Country Park',
+            city => 'Swindon',
+            zip => 'SN6 7SD',
+            country => 'United Kingdom',
+            other_names => ['Stanton Country Park'],
+            url => 'http://www.swindon.gov.uk/lc/lc-parks/lc-parks-list/pages/lc-parks-list-stanton.aspx',
+            flags => {
+                has_food => 1,
+                has_tea_and_coffee => 1,
+                is_outside => 1,
+            },
+        },
+        'Wharf Green' => {
+            latitude => 51.560091,
+            longitude => -1.787403,
+            street => 'Canal Walk',
+            name => 'Wharf Green',
+            city => 'Swindon',
+            zip => 'SN1 1RZ', ## or 1LD ?
+            country => 'United Kingdom',
+            other_names => ['Big Screen'],
+            #url => '',
+            flags => {
+                is_outside => 1,
+            },
+        },
+        'Savernake Street Social Hall' => {
+#            latitude => 51.560091,
+#            longitude => -1.787403,
+            street => 'Savernake Street',
+            name => 'Savernake Street Social Hall',
+            city => 'Swindon',
+            zip => 'SN1 3LZ',
+            country => 'United Kingdom',
+            #other_names => [''],
+            #url => '',
+        },
+        'Highworth Community Centre' => {
+#            latitude => 51.560091,
+#            longitude => -1.787403,
+            street => 'The Dormers',
+            name => 'Highworth Community Centre',
+            city => 'Swindon',
+            zip => 'SN6 7PQ',
+            country => 'United Kingdom',
+            #other_names => [''],
+            #url => '',
+        },
+
     };
 
     return $known_venues;
 }
 
 sub find_venue {
-    my ($class, $str) = @_;
+    my ($class, @strings) = @_;
 
     my $venues = venues();
-    foreach my $name (keys %$venues) {
-        if(($venues->{$name}{other_names} && 
-            grep { $str =~ /$_/i} @{$venues->{$name}{other_names}}) 
-           || $str =~ /$name/) {
-            return $venues->{$name};
+    foreach my $name (sort { length($b) <=> length($a) } keys %$venues) {
+        foreach my $str (@strings) {
+            next if !$str;
+            $str = unidecode($str);
+            if(($venues->{$name}{other_names} && 
+                grep { $str =~ /$_/i} @{$venues->{$name}{other_names}}) 
+               || $str =~ /$name/) {
+                return $venues->{$name};
+            }
         }
     }
     return undef;

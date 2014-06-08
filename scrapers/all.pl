@@ -41,7 +41,7 @@ foreach my $source (@{$config{Source}}) {
         next;
     }
 
-#    next if $source->{plugin} eq 'Facebook';
+#    next unless $source->{plugin} eq 'Facebook';
     next if $source->{plugin} eq 'Facebook' && $source->{page_id} =~ /\D/;
     my $events = $plugin->get_events($source);
 
@@ -50,7 +50,7 @@ foreach my $source (@{$config{Source}}) {
         print Dumper($event);
 
         ## Skip past events:
-        next if $event->{start_time} <= DateTime->now();
+        next if $event->{start_time} && $event->{start_time} <= DateTime->now();
         
         if(!$event->{event_id}) {
             $event->{event_id} = "$source->{name}:$event->{start_time}";
@@ -58,68 +58,51 @@ foreach my $source (@{$config{Source}}) {
 
         my $next_venue_id;
         my $venue_data;
-        if(exists $event->{venue_loc}) {
-            $venue_data = $event->{venue_loc};
-        } else {
-            $venue_data = $source->{Venue};
-        }
+        ## This oughta be normalised in the Scrapers!
+#        $venue_data = $event->{venue} ||  $source->{Venue};
+        $venue_data = $event->{venue_loc} || $event->{venue} ||  $source->{Venue};
         
         ## We allow no venue at all? see hip routes fb events ?
-        if(!$event->{venue_loc}{id}) {
+        if(!$venue_data->{id}) {
             ## highly random:
             $next_venue_id = $schema->resultset('Venue')->count + 1;
             $next_venue_id = "eventy:$next_venue_id";
         }
-        my $venue;
+        my $db_venue;
         if(defined $venue_data->{name}) {
-            $venue = $schema->resultset('Venue')->find_or_new({
+            $db_venue = $schema->resultset('Venue')->find_or_new({
                 name => $venue_data->{name},
                 ( $venue_data->{id} ? ( id => $venue_data->{id} ) : () ),
                                                               });
         }
-        my $db_event;
+        if($db_venue) {
+            update_venue($venue_data, $db_venue);
+        }
+        $event->{times} = [ { start => $event->{start_time}, end => undef} ]
+            if(!$event->{times} && $event->{start_time});
         my $event_data = {
             id => $event->{event_id},
             name => $event->{event_name},
             description => $event->{event_desc},
-            ## moved to Time
-#            start_time => $event->{start_time},
             url => $event->{event_url},
+            times => [ map { { 
+                start_time => $_->{start},
+                end_time   => $_->{end},
+                } } @{ $event->{times} } ],
         };
-        $event->{times} = [ { start => $event->{start_time}, end => undef} ]
-            if(!$event->{times} && $event->{start_time});
-        if($venue && !$venue->in_storage) {
-            ## This oughta be something more sane
-            $venue->last_verified(DateTime->now());
-            if(!$venue->id) {
-                $venue->id($next_venue_id);
+
+        my $db_event = find_or_create_event($schema, $db_venue, $event_data);
+        if($db_venue) {
+            if(!$db_venue->id) {
+                $db_venue->id($next_venue_id);
             }
-            $venue->latitude($venue_data->{latitude});
-            $venue->longitude($venue_data->{longitude});
-            $venue->address(join(", ", ( map { $venue_data->{$_} || () }
-                                         (qw/street city zip country/)
-                                 )));
-            $venue->insert;
-            $db_event = $venue->create_related('events', $event_data);
-        } else {
-            my $dtp = $schema->storage->datetime_parser;
-            if($venue) {
-                $db_event = $venue->events->find_or_new({
-                    start_time => $dtp->format_datetime($event->{start_time}),
-                                                    });
+            if(!$db_venue->in_storage) {
+                $db_venue->insert;
             } else {
-                $db_event = $schema->resultset('Event')->find_or_new({
-                    start_time => $dtp->format_datetime($event->{start_time}),
-                                                                     });
+                $db_venue->update;
             }
-            if(!$db_event->in_storage) {
-                $db_event->id($event->{event_id});
-                $db_event->name($event->{event_name});
-                $db_event->insert;
-            } else {
-                warn "Updating event we already knew about, based on Venue/Starttime";
-            }
-            $db_event->update($event_data);
+            $db_event->venue($db_venue);
+            $db_event->update()
         }
 
         my @acts = $event->{event_name};
@@ -152,4 +135,78 @@ foreach my $source (@{$config{Source}}) {
         warn "No future events to put in DB for: " . Dumper($source);
     }
 #    print Dumper($events);
+}
+
+sub find_or_create_event {
+    my ($schema, $db_venue, $event_data) = @_;
+
+    ## Find an event with matching times/venue, add any missing times
+    ## or create new event
+    my $dtf = $schema->storage->datetime_parser;
+    my $db_event;
+    my $events_rs;
+    my @time_search = (
+            {
+                'times.start_time' => { 
+                    '-in' => [ map { $dtf->format_datetime($_->{start_time}) } @{$event_data->{times} } ]
+                },
+            },
+            {
+                columns => [ 'id' ],
+                distinct => 1,
+                join    => 'times',
+            }
+        );
+    if($db_venue && $db_venue->in_storage) {
+        $events_rs = $db_venue->related_resultset('events')->search(@time_search);
+    } else {
+        $events_rs = $schema->resultset('Event')->search({
+            %{$time_search[0]},
+            'me.id' => $event_data->{id}
+                                                         },
+            $time_search[1]);
+    }
+
+    my $event_count = $events_rs->count;
+    if($event_count > 1) {
+        warn "Multiple events at same venue at same time!? $event_data->{name}";
+    }
+    if($event_count == 1) {
+        ## We found it!
+        $db_event = $events_rs->first;
+        $db_event->times->delete;
+        $db_event->times_rs->create($_) for (@{ $event_data->{times} });
+        # $db_event->times_rs->create({ start_time => $_->{start},
+        #                               end_time => $_->{end} }) for (@{ $event_data->{times} });
+    }
+    
+    
+    $db_event ||= $schema->resultset('Event')->find_or_create($event_data);
+    return $db_event;
+}
+
+# Might have multiple URLs, from swindon.gov and facebook?
+sub update_venue {
+    my ($venue, $db) = @_;
+
+    $db->url($venue->{url}) if(!$db->url && $venue->{url});
+    my $address = join("\n", $venue->{qw/street city zip/});
+    $db->address($address);
+    $db->latitude($venue->{latitude});
+    $db->longitude($venue->{longitude});
+    my $url_name = lc $venue->{name};
+    $url_name =~ s/[^\w\d\s]//g;
+    $url_name =~ s/\s+/ /g;
+    $url_name =~ s/\s/-/g;
+    print STDERR "URL name for $venue->{name} is $url_name\n";
+    $db->url_name($url_name) if(!$db->url_name && $url_name);
+
+    # has_food, has_wifi, is_outside etc
+    if(exists $venue->{flags}) {
+        foreach my $flag (keys %{$venue->{flags}}) {
+            if($venue->{flags}{$flag} && $db->can($flag)) {
+                $db->$flag(1);
+            }
+        }
+    }
 }

@@ -120,7 +120,7 @@ sub get_events {
                 $e->{venue} = $known_venues->{$venue_name} || __PACKAGE__->find_venue($venue_name);
 
                 
-                Dump($e)->Freezer('DateTime', 'iso8601')->Out();
+#                Dump($e)->Freezer('DateTime', 'iso8601')->Out();
 
                 push @events, $e;
             }

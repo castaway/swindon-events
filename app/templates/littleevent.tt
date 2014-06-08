@@ -1,1 +1,1 @@
-<div class="littleevent" style="[% eventstyle %]"title="[% event_row.name %]">[% event_row.start_hour %] [% event_row.name | html %] ([% event_row.venue.name %])</div>
+<div class="littleevent" style="[% eventstyle %]" title="[% event_row.name %]" >[% event.hour %] <a href="[% event_row.url %]">[% event_row.name | html %]</a> [% IF venue_link %]<a href="[% base_uri%]/venue/[% event_row.venue.url_name %]"> ([% event_row.venue.name %])</a>[% END %]</div>

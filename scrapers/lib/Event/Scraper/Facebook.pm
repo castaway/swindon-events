@@ -5,6 +5,7 @@ use DateTime;
 use DateTime::Format::ISO8601;
 use feature 'state';
 use Data::Dump::Streamer 'Dump', 'Dumper';
+use base 'Event::Scraper::Website::Swindon';
 $|=1;
 
 my $fbg;
@@ -92,9 +93,12 @@ sub expand_event {
   my $ut = $fb_event->{start_time};
   $ut =~ s{\+\d{4}$}{};
   $ret->{updated_time} = DateTime::Format::ISO8601->parse_datetime($ut);
+
+  ## Attempt to normalise venues:
+  my $sw_venue = __PACKAGE__->find_venue($fb_event->{location});
   
-  $ret->{venue_loc} = $fb_event->{venue};
-  $ret->{venue_loc}{name} = $fb_event->{location};
+  $ret->{venue} = $sw_venue || $fb_event->{venue};
+  $ret->{venue}{name} ||= $fb_event->{location};
 
 #  print "expanded: ", Dumper($ret);
 
