@@ -1,0 +1,5 @@
+[% WRAPPER wrapper.tt %]
+  <h2>[% venue.name | html %]</h2>
+  <h3>Events</h3>
+  [% INCLUDE events_by_day.tt events = venue.events_rs.by_day venue_link = 0%]
+[% END %]

@@ -1,0 +1,16 @@
+      [% FOREACH date = events.keys.sort %]
+        <p/>
+        <hr/>
+        [% SET this_date = events.$date.0.date %]
+        <h3>[% this_date.day_name %] [% this_date.dmy %]</h3>
+        [% FOREACH event = events.$date %]
+            [% IF event.ended;
+               eventstyle = 'opacity: 0.5;';
+             ELSIF event.today;
+               eventstyle = 'color:maroon;';
+             ELSE;
+               eventstyle = '';
+             END %]
+            [% INCLUDE littleevent.tt event_row = event.row %]
+        [% END %]
+      [% END %]

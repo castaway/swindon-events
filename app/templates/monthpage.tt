@@ -1,0 +1,13 @@
+[% WRAPPER wrapper.tt %]
+    <h2>Swindon Events - [% start_date.month_name %], [% start_date.year %]</h2>
+    <div id="calendar"> [%# class="fc-calendar-container"> %]
+    [% INCLUDE events_by_day.tt events=events venue_link=1%]
+    </div>
+    <hr/>
+    
+    <a href="[% base_uri %]/calendar/[%prev_month.year | format('%02d')%]/[%prev_month.month | format('%02d')%]">&lt; [% prev_month.month_name %]</a> <a href="[% base_uri %]/calendar/[%next_month.year | format('%02d')%]/[%next_month.month | format('%02d')%]"> [% next_month.month_name %] &gt;</a>
+
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+	<script type="text/javascript" src="[% static_uri %]/static/js/jquery.calendario.js"></script>
+	<script type="text/javascript" src="[% static_uri %]/static/js/data.js"></script>
+[% END %]
