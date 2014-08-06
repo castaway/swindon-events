@@ -1,0 +1,19 @@
+[% WRAPPER wrapper.tt %]
+  <h2>Pub Boards and Posters</h2>
+  [% FOREACH image = images %]
+  <h3>[% image.title %] ([% image.original_date.ymd %])</h3>
+  <div style="float:left;">
+    <a href="[% image.url_linkback %]"><img src="[% image.url_image %]"></a>
+  </div>
+  <p>[% image.tags %]</p>
+  <p>[% image.description %]</p>
+  <div>
+   <form action="[% base_uri %]/ocr_image" method="post">
+     <input type="hidden" name="id" value="[% image.id %]" />
+     <textarea cols="30" rows="5" name="sign_text">[% image.sign_text %]</textarea>
+     <input type="submit" name="Submit" value="Submit" />
+   </form>
+  </div>
+  <div style="clear:both;"></div>
+  [% END %]
+[% END %]
