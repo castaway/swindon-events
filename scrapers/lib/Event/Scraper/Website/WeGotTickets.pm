@@ -43,7 +43,7 @@ sub get_events {
         }
 
         $l_date = $l_date->as_text;
-        $l_date =~ s/(\d)(?:th|st|rd)/$1/;
+        $l_date =~ s/(\d)(?:th|st|rd|nd)/$1/;
         print STDERR "Date: ", $l_date, "\n";
         my $e_date = $formatter->parse_datetime($l_date);
         print STDERR "Date: ", $e_date->ymd;

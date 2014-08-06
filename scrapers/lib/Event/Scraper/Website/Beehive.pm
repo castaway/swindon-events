@@ -1,3 +1,4 @@
+# -*- perl; tab-width: 2 -*-
 package Event::Scraper::Website::Beehive;
 $|=1;
 use strictures 1;
@@ -13,6 +14,7 @@ sub get_events {
 
   my $url = $source_info->{page};
 
+  Dump($source_info);
   my $html = get($url) or die "Couldn't get $url";
   my $root = HTML::TreeBuilder->new_from_content($html);
   
@@ -44,34 +46,33 @@ sub get_events {
         $context = 'date';
       } elsif ($context eq 'date') {
         if ($t =~ m/Last Sunday of every month 8pm/) {
-          # We should probably just ignore this event.
-          $event->{ignore_me}++;
-        } else {
-          
-          # There is no use providing a month name (Jan) without providing a year. at lib/Event/Scraper/Website.pm line 58.
-          () = <<'END';
-          my $format = DateTime::Format::Strptime->new(
-                                                       locale => 'en_GB',
-                                                       time_zone => 'Europe/London',
-                                                       # Friday Jan 10th 8.30pm
-                                                       pattern => '%A %B %dth %l.%M%p',
-                                                       on_error => 'croak',
-                                                      );
-
-          $format->parse_datetime($t);
-END
-
-
-          $t =~ s/(Saturday|Monday|Tuesday|Wednesday|Thursday|Friday|Sunday)//;
-          $t =~ s/^\s+//;
-          $t =~ s/(\d+)\.(\d\d)/$1:$2/;
-
-          my ($epoch, $err) = parsedate($t, UK=>1, WHOLE=>0, VALIDATE=>1);
-          if ($err) {
-            die "could not parsedate $t: $err";
+          my $now = DateTime->now();
+          my $dt = DateTime->last_day_of_month(year => $now->year,
+                                               month => $now->month);
+          while($dt->day_name !~ /Sunday/) {
+            $dt = $dt->subtract(days => 1);
           }
-          $event->{start_time} = DateTime->from_epoch(epoch => $epoch);
-          $event->{start_time}->set_time_zone('Europe/London');
+          $event->{times}[0]{start} = $dt;
+        } else {
+
+          my $t_start = $t;
+          my $t_end;
+          if($t =~ /-/) {
+            ($t_start, $t_end) = split(/-/, $t);
+          }
+
+          my $start_dt = DateTime->from_epoch(epoch => get_datetime($t_start));
+          push @{$event->{times}}, { start => $start_dt };
+          $event->{times}[-1]{start}->set_time_zone('Europe/London');
+          if($t_end) {
+            my $end_dt = DateTime->from_epoch(epoch => get_datetime($t_end));
+            while($start_dt <= $end_dt) {
+              $start_dt = $start_dt->clone->add(days => 1);
+              push @{$event->{times}}, { start => $start_dt };
+              $event->{times}[-1]{start}->set_time_zone('Europe/London');
+            }
+          }
+          $event->{start_time} = $event->{times}[0]{start};
         }
         $context = 'desc';
       } elsif ($context eq 'desc') {
@@ -81,12 +82,28 @@ END
       }
     }
     
+    $event->{url} = $url;
     print Dumper($event);
 
     push @ret, $event;
   }
 
   return \@ret;
+}
+
+sub get_datetime {
+    my ($string) = @_;
+
+    $string =~ s/(Saturday|Monday|Tuesday|Wednesday|Thursday|Friday|Sunday)//;
+    $string =~ s/^\s+//;
+    $string =~ s/(\d+)\.(\d\d)/$1:$2/;
+    
+    my ($epoch, $err) = parsedate($string, UK=>1, WHOLE=>0, VALIDATE=>1);
+    if ($err) {
+        die "could not parsedate $string: $err";
+    }
+
+    return $epoch;
 }
 
 1;

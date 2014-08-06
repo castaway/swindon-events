@@ -29,13 +29,15 @@ sub get_events {
 
     # Then, copy-and-paste the access_token in.
 
-    #print "Auth uri: ", $fbg->authorize->uri_as_string, "\n";
+# perl -Ilib -MEvent::Scraper::Facebook -MData::Dumper -le'my $events = Event::Scraper::Facebook->get_events; print Dumper($events)' | less
+
+#    print "Auth uri: ", $fbg->authorize->uri_as_string, "\n";
 # http://desert-island.me.uk/this-will-404/?code=AQBdFQHI10zquwfKzVRZhc41XuIhDbCcpedIGVM6U3q8Cn0cp-r4j6dhNJrMqQ73vZb4kaTrGgK6XowlLOcp3dMrQhDxEbTOT5UYPSRK-M1nfrJQDrySnV3YHUHRm1dQ6FY_XQe5O2RuyOJXuLcu7UpzwFK_t3F_PzXFdrnYLOJ_hNtD-QK8Erso1nFSUzPkk6u2WiEm17apIbHNimpjMmFhVFxmhNUv4LfUOO6GYLFmmBI0UQ3q7RuvS377C8YUmD19K_WZCpQumzvTdPMG0YDX3owb67HdzcB9LrP1uFcQEXlHJDT_zJGq8QS421OyarE#_=_
-    #$fbg->request_access_token('AQBdFQHI10zquwfKzVRZhc41XuIhDbCcpedIGVM6U3q8Cn0cp-r4j6dhNJrMqQ73vZb4kaTrGgK6XowlLOcp3dMrQhDxEbTOT5UYPSRK-M1nfrJQDrySnV3YHUHRm1dQ6FY_XQe5O2RuyOJXuLcu7UpzwFK_t3F_PzXFdrnYLOJ_hNtD-QK8Erso1nFSUzPkk6u2WiEm17apIbHNimpjMmFhVFxmhNUv4LfUOO6GYLFmmBI0UQ3q7RuvS377C8YUmD19K_WZCpQumzvTdPMG0YDX3owb67HdzcB9LrP1uFcQEXlHJDT_zJGq8QS421OyarE');
+#    $fbg->request_access_token('AQCUdh1po37RhilQ69kXYlhPrCHT6ECOfK1VgxnIpn7q7Ii-pZIlmczjJHTho1HZG5OUcHZTX4lMKy-VainsUSdBvTksylvdhLx6AKIe8XaajEvlYZStkobwYk8wTX6kk-rd17rq7imDMN_BWrE_aWCnez84OQwk-dZ1aN7KMni2LDu1Llzkw6JrSj5RYAP9zSafVb4GVO0tq8kGuYfnO6J586FqEG9kyohwv1s1-ZKIFTJY7keYcPp9VP2wJxXr-3C6roV3pdagn8YkcpCqC0bRyt-oXxyk50hoMzCFPjdvC64KTjGBPeRI7sET1or1jPw');
 
-    $fbg->access_token('CAAIGb948uZAwBAMWbtHcsMKUoPEtm3ph58lcJ0MZBcaccoOyyoAtVQgVpwZAXt41nl6ZAVmoQ0rZBr9U1x0aayIQyKI6O3vlfXk6Geo1YJyZAOukj0dKhN9zAGOk32gUI1u4e0vya7pZBBqY0gmCqiFlo76eZBM2f2ZC5QnhAZAuLloMOSZA2EfxHmlccizt5tpZCUQZD');
+    $fbg->access_token('CAAIGb948uZAwBAEqtBHm7iaPto5ebbHZBcdVEmVtZAFrVrLEYTZB7p9AqhrCa4eVFw0b1MiSxzxnUdkxlZAb4ZAAW3n9y1PBKNDPp3jbvVTUUoSRZC2ZCl1G6RaG7Qs0Jv4YK4tKFLHkIaVfwZBc7R4vBtq94y45KAd6AuIZAZA0bZAYKHOv2t5zIVcOQHxmtFBM56D5i6yhL2mZCJ5oRxoNzrFHJ');
 
-    #Dump $fbg;
+#    Dump $fbg;
   }
 
   my @ret;

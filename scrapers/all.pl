@@ -41,7 +41,8 @@ foreach my $source (@{$config{Source}}) {
         next;
     }
 
-#    next unless $source->{plugin} eq 'Facebook';
+#    next unless $source->{plugin} =~ /Beehive/;
+#    next if $source->{plugin} eq 'Facebook';
     next if $source->{plugin} eq 'Facebook' && $source->{page_id} =~ /\D/;
     my $events = $plugin->get_events($source);
 

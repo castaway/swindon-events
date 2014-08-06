@@ -27,6 +27,20 @@ sub venues {
                 is_outside => 1,
             },
         },
+        'County Ground' => {
+            name => 'Swindon Town Football Club',
+            street => 'County Road',
+            city => 'Swindon',
+            zip => 'SN1 2ED',
+            country => 'United Kingdom',
+        },
+        'Civic Offices' => {
+            name => 'Civic Offices',
+            street => 'Euclid Street',
+            city => 'Swindon',
+            zip => 'SN1 2JH',
+            country => 'United Kingdom',
+        },
         'Barbury Castle' => {
             name => 'Barbury Castle',
             street => 'The Ridgeway Trail',
