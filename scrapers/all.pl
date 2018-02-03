@@ -34,12 +34,16 @@ my %config = $conf->getall();
 my $keyconf = Config::General->new("keys.conf");
 
 ## Coder:
+my $mapquest_key = { $keyconf->getall() }->{Keys}{mapquest_key};
 my $geocoder = Geo::Coder::Mapquest->new(
-    apikey => 'ArCTGfk5prnzrRqtw5AJmlZJxemOlNOt',
+    apikey => $mapquest_key,
     open => 1,
 );
 my $osmcoder = Geo::Coder::OSM->new();
 my $oscodes = retrieve("oscodes.store");
+
+## static maps:
+my $map_image_path = $ENV{EVENTS_HOME}'. '/app/static/images/maps/';
 
 ## Plugins
 setmoduledirs('./lib');
@@ -93,7 +97,8 @@ foreach my $source (@{$config{Source}}) {
         next if $event->{start_time} && $event->{start_time} <= DateTime->now();
         
         if(!$event->{event_id}) {
-            $event->{event_id} = "$source->{name}:$event->{start_time}";
+            my $start = $event->{start_time} || $event->{times}[0]{start};
+            $event->{event_id} = "$source->{name}:$start";
         }
 
         my $next_venue_id;
@@ -362,8 +367,14 @@ sub update_venue {
             # Attempt to get Lat/Lng for postcode, from OS data:
             if($pcode) {
                 $pcode =~ s/\s+//g;
-                $venue->{latitude} ||= $oscodes->{$pcode}[0];
-                $venue->{longitude} ||= $oscodes->{$pcode}[1];
+                $venue->{latitude} ||= $oscodes->{uc ($pcode) }[0];
+                $venue->{longitude} ||= $oscodes->{uc ($pcode) }[1];
+                ## Enforce skipping of this venue if we have its postcode
+                # but it isnt in SN (oscodes only has SN as loading the whole
+                # thing took up much memory
+                $venue->{latitude} ||= 0;
+                $venue->{longitude} ||= 0;
+                
                 print STDERR "Post code lat/lng: ($pcode) $venue->{latitude} $venue->{longitude}\n";
             }
         }
@@ -386,6 +397,43 @@ sub update_venue {
             }
         }
     }
+
+    ## Attempt to create a static map for this venue (if lat/lon exists)
+    $db->store_map($map_image_path, $mapquest_key);
+}
+
+sub venue_url {
+    my ($name) = @_;
+
+    return $schema->resultset('Venue')->venue_url($name);
+}
+
+sub insert_acts {
+    my ($db_event, @acts) = @_;
+
+    @acts = map {if (m/^(.*) presents: ?(.*)/) {
+        # x presents: ... -- how do we list x?  It's not really an
+        # act, so we shouldn't have it in @acts, and we already have
+        # the event name as a whole.  When we have a recommendation
+        # engine, revisit this?
+        ($2);
+                 } else {
+                     ($_);
+                 }}
+    @acts;
+
+    @acts = map {split(/ \+ /, $_)} @acts;
+    @acts = map {split(/, /, $_)} @acts;
+        
+
+    foreach my $act (@acts) {
+#            my $db_act = $db_event->event_acts->related_resultset('act')->find_or_create({
+#        my $db_act = $schema->resultset('Act')->search({ name => $act });
+        my $db_act = $schema->resultset('Act')->find_or_create({
+            name => $act,
+                                                               });
+        $db_event->find_or_create_related('event_acts', { act => $db_act });
+    }   
 }
 
 sub venue_url {

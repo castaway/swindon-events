@@ -2,7 +2,7 @@ package Event::Scraper::Facebook;
 use strictures 1;
 use Facebook::Graph;
 use DateTime;
-use DateTime::Format::ISO8601;
+use DateTime::Format::HTTP;
 use feature 'state';
 use Data::Dump::Streamer 'Dump', 'Dumper';
 use base 'Event::Scraper::Website::Swindon';
@@ -87,7 +87,7 @@ sub expand_event {
 
   my $st = $fb_event->{start_time};
   $st =~ s{\+\d{4}$}{};
-  $ret->{start_time} = DateTime::Format::ISO8601->parse_datetime($st);
+  $ret->{start_time} = DateTime::Format::HTTP->parse_datetime($st, $fb_event->{timezone});
   $ret->{start_time}->set_time_zone($fb_event->{timezone}) if $fb_event->{timezone};
   if($ret->{start_time} < $today) {
       return ();
@@ -95,7 +95,7 @@ sub expand_event {
   if($fb_event->{end_time}) { 
       my $et = $fb_event->{end_time};
       $et =~ s{\+\d{4}$}{};
-      $ret->{end_time} = DateTime::Format::ISO8601->parse_datetime($et);
+      $ret->{end_time} = DateTime::Format::HTTP->parse_datetime($et, $fb_event->{timezone});
       $ret->{end_time}->set_time_zone($fb_event->{timezone}) if $fb_event->{timezone};      
   }
   if(!$fb_event->{place}{name} || $fb_event->{place}{name} eq 'Swindon') {
@@ -112,7 +112,7 @@ sub expand_event {
 #  $ret->{tz_hint} = $fb_event->{timezone};
   my $ut = $fb_event->{updated_time};
   $ut =~ s{\+\d{4}$}{};
-  $ret->{updated_time} = DateTime::Format::ISO8601->parse_datetime($ut);
+  $ret->{updated_time} = DateTime::Format::HTTP->parse_datetime($ut);
 
   ## Attempt to normalise venues:
   my $sw_venue = __PACKAGE__->find_venue($fb_event->{place}{name});

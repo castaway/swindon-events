@@ -1,3 +1,445 @@
+
+https://github.com/toddmotto/echo - lazy image loading
+
+https://www.rotary-ribi.org/clubs/diary.php?ClubID=630
+
+Oxford:
+https://www.facebook.com/pg/futureperfectlive/events/?ref=page_internal
+
+09.06.2017:
+
+Geocoding of addresses (mostly facebook)
+* Geo::Coder::Mapquest, doesnt cope with address with no commas in it, not good at some postcodes, eg Bowood house - SN11 0LZ
+* Geo::UK::Postcode::Regex - regexes that dont cope with "normal" (XXNN NYY) format.. something about spaces?
+* Geo::Coder::OSM - even worse than the ::Mapquest one at geocoding postcodes?
+* Geo-Postcode (2011) - taking ages to pass tests? - quite crude geolocation - static and only for first half of code
+* Address::PostCode::UK - frontend to http://uk-postcodes.com/ - website doesnt work? (keeps getting cloudflare pages)
+* Geo::UK::Postcode ? has manual geolocation instructions by downloading https://www.ordnancesurvey.co.uk/business-and-government/products/code-point-open.html ?
+** using combo of mapquest and geo::uk::postcode
+Post code lat/lng: (PO80QE)  - doesnt exist in OS data??
+
+
+
+14.02.2017:
+
+https://www.w3.org/TR/html5/dom.html#metadata-content-0
+
+2017-02-04
+
+http://www.swindonfilm.org.uk/programme.html
+http://www.steam-museum.org.uk/events/pages/EventsSummary.aspx
+http://swindonmuseumandartgallery.org.uk/events/
+
+https://www.ticketsource.co.uk/southcerneyplayers
+
+HTML::Element cant cope with "meta" tag mid body, cos HTML::TagSet, last released 2008, doesnt know about it..
+
+https://rt.cpan.org/Public/Bug/Display.html?id=99936
+  $HTML::Tagset::isHeadOrBodyElement{link} = 1;
+  $HTML::Tagset::isHeadElement{link} = undef;
+
+20.01.2017:
+
+Fun with "max dist" from Swindon - Cheltenham, Oxford etc are < 30 miles and about 45mins.. Salisbury is 34miles and more like 90min ! can we do it based on time-to-arrive ?
+
+
+
+http://www.northwessexdowns.org.uk/news-events/aonb-events.html
+
+Tweet every hour, 10past - castaway cron on insel.
+Add Preferred/ordered by categories
+Add twitter accounts to venues / sources? (@MuseumandArt)
+
+https://developers.facebook.com/docs/facebook-login/access-tokens#extending
+
+http://www.swindondance.org.uk/events
+
+pubboards / images!
+- /mnt/shared/projects/events/pubboards/get_images.pl
+
+0  HASH(0xaf642d8)
+   'city' => 'Old Town, Swindon'
+   'country' => 'United Kingdom'
+   'latitude' => 51.54462789999999
+   'longitude' => '-1.7504040000000032'
+   'name' => 'HSBC Bank Plc'
+   'street' => 'HSBC Bank Plc, Wiltshire Corporate Centre'
+   'zip' => 'SN3 1QN'
+0  HASH(0xaf63fcc)
+   'city' => 'Old Town, Swindon'
+   'country' => 'United Kingdom'
+   'latitude' => 51.54462789999999
+   'longitude' => '-1.7504040000000032'
+   'name' => 'HSBC Bank Plc'
+   'street' => 'HSBC Bank Plc, Wiltshire Corporate Centre'
+   'zip' => 'SN3 1QN'
+
+
+
+http://www.thebrunel.co.uk/
+
+          'venue' => { 
+                       'country' => 'United Kingdom',
+                       'longitude' => '-1.7914749999999913',
+                       'zip' => 'SN1 5BJ',
+                       'city' => 'Swindon',
+                       'latitude' => '51.5604526',
+                       'street' => 'Faringdon Road',
+                       'name' => 'The Platform'
+                     },
+
+DBIx::Class::Storage::DBI::_dbh_execute(): DBI Exception: DBD::Pg::st execute failed: ERROR:  duplicate key value violates unique constraint "url_name"
+DETAIL:  Key (url_name)=(the-platform) already exists. [for Statement "INSERT INTO venues ( address, id, latitude, longitude, name, url_name) VALUES ( ?, ?, ?, ?, ?, ? )" with ParamValues: 1='Faringdon Road
+Swindon
+SN1 5BJ', 2='eventy:200', 3='51.5604526', 4='-1.7914749999999913', 5='The Platform', 6='the-platform'] at ./all.pl line 127
+
+
+PROGRAMME
+Thursday 1st October
+NATIONAL POETRY DAY
+Twas on a Holy Thursday their innocent faces clean
+The children walking two & two in red & blue & green
+
+William Blake
+
+Poems Aloud with Hilda Sheehan
+Central Library, Swindon
+10am to 12noon
+Free
+
+Our festival kicks off to a lively start on National Poetry Day with an open mic. All are welcome to bring favourite poems, or poems written, to share with a warm and welcoming audience.
+
+Children’s Poetry with Elli Woolard
+Central Library, Swindon
+11am to 11.30 am
+Free
+Join Elli, creator of Woozy the Wizard and author of original poems for the young (and the young at heart!) as she takes words for a stroll … where will she take them? Where will she take you? Have fun finding out!!
+
+Poetry Films
+Central Library
+1pm to 2.30pm
+Free
+Come and enjoy a selection of poems developed into film by Poetry Swindon poets and Elephant Footprint Filmmakers Chaucer Cameron and Helen Dewbery.
+
+ Prose Poetry Discussion with Luke Kennard, Tania Hershman and Carrie Etter
+ Lower Shaw Farm
+ 3:00pm to 4.30pm
+ £5 (£4)
+ Description: What is a Prose Poem? Is it a hybrid? Does it even exist? If it does, what are its origins? Join Luke Kennard, Tania Hershman and the Ted Hughes Prize shortlisted Carrie Etter for a lively discussion about the whys and wherefores of the form.
+
+ Poetry Tea with Tania Hershman and Luke Kennard
+ Lower Shaw Farm
+ 5pm to 6.30pm
+ £5 (£4)
+ Thirsting for more after Tania, Luke and Carrie’s discussion. Then why not join them for a scrumptious tea, whilst Tania and Luke entertain us with their most recent works.
+
+ Railway Poetry with Jonathan Davidson and Jo Bell
+ Swindon & Cricklade Heritage Railway
+ 8pm to 10pm
+ £5 (£4)
+ Modern Swindon was forged in the workshops of the Great Western Railway and this event, held in a refurbished railway carriage, celebrates Swindon’s railway heritage. Kindly sponsored by First Great Western, part of First Group, the evening will feature readings from this year’s Poetry Swindon Anthology on the theme of railways. This will be followed by a reading of railway poems by Jonathan Davidson, accompanied by our festival poet in residence, Jo Bell. Their readings will include some of the work of Swindon’s own ‘Hammerman’ poet, Alfred Williams, whose greatest work ‘Life in a Railway Factory’ was written in just 12 weeks … “at night, after leaving the forge”…
+
+ Friday 2nd October 2015
+
+ Poetry Workshop with Jo Bell
+ Lower Shaw Farm
+ 10am to 12noon
+ £15
+ Always wanted to work with the ever-popular UK Canal Laureate, Jo Bell? Well, now is your chance! Join Jo for a two hour workshop exploring all things ….?????
+
+ Flash Fiction Workshop with Tania Hershman
+ Lower Shaw Farm
+ 10am to 12noon
+ £15
+ Not sure what ‘Flash Fiction’ is? Well, if short fiction can be described as an art form in which every word has to earn its place, then Flash Fiction takes this even further. Sometimes called postcard fiction, or micro fiction these are not pieces of larger works, but entire works in their own right and often resemble poetry in their language. Join Tania for an exciting, challenging and fun introduction to the form.
+
+ Poetry Lunch with Tim Liardet
+ Lower Shaw Farm
+ 1pm to 2.30pm
+ £10
+ Description:
+
+ After lunch, we change venue to Savernake Street Social Hall, Swindon, for a fun, relaxed afternoon and evening of poetry, with music by DJ Bobby the Persuader. We start the proceedings at Savernake Street with:
+ Cheltenham Poets: Anna Saunders, David Clarke, Ross Cogan and Jennie Farley
+ Savernake Street Social Hall
+ 3:00pm to 4:00pm
+ £5 (£4)
+ A quartet of Cotswold poets entertain us with their four very different takes on poetry and the world at large. This will be followed by:
+ Tea and Cakes with poets Myra Schneider and Isabel Palmer
+ Savernake Street Social Hall, Swindon
+ 5:00pm to 6:30pm
+ £10
+ An informal, fun, and inspiring gathering with Myra, whose works include …xxxxx…. And with Swindon poet Isabel Palmer.
+
+ Double Bill: by Andy Jackson
+ Savernake Street Social Hall, Swindon
+ Sit back, relax and enjoy this multi-media event with poetry inspired by movies, television, music and radio. Don’t forget your popcorn!
+ 6:30pm to 8:00pm
+ £5 (£4)
+
+ Our day concludes with a stonking double bill of a different kind:
+ Guest poet Kei Miller along with our Festival Poet in Residence, Jo Bell
+ Savernake Street Social Hall, Swindon
+ 8:30 pm to 10pm (start time will depend on location of venue and travel time from LSF)
+ £7 (£6)
+ Kei and Jo will treat us to readings from their latest works, and then our double bill becomes a triple bill as DJ Bobby the Persuader rounds the evening off for us.
+
+ Saturday 3rd October 2015
+
+ Poetry Workshop with Kei Miller
+ Lower Shaw Farm
+ 10am to 12noon
+ £15
+
+ Description
+
+ Poetry Workshop with Robert Vas Dias
+ Lower Shaw Farm
+ 10am to 12noon
+ £15
+ Description: The poetry of chance
+
+ Poetry Surgeries with Jo Bell
+ Lower Shaw Farm
+ 10am to 12noon
+ £10
+ Description
+
+ Poetry Lunch with Robert Vas Dias
+ Lower Shaw Farm
+ 12:30pm to 2.00pm
+ £10
+ Description
+
+ All Afloat!
+ A boat, somewhere on the Wilts & Berks Canal.
+ 2:30pm to 5:00pm
+ £tbc
+ What else could we do with the UK’s Canal Laureate but put her in a boat?! Join Jo for canal-based poetry during a series of short trips along the Swindon section of the Wilts & Berks canal. And for the land-bound, waiting their turn, Swindon’s own Michael Scott will take you on a psychogeographic adventure along the tow path. No life jackets required.
+
+ Poetry Tea with Richard Skinner
+ Lower Shaw Farm
+ 5.30pm to 7pm
+ £10
+
+ Description
+
+ Battered Moons Finale with Pascale Petit
+ Venue TBC
+ 8pm to 10pm
+ £ 7 (£6)
+ Join Pascale Petit for the final of this year’s Battered Moons poetry competition. Along with a reading from Pascale, all finalists will read their short-listed work before the winners are announced.
+
+ Sunday 4th October 2015
+
+ Poetry Masterclass with Pascale Petit
+ Lower Shaw Farm
+ 10am to 4pm
+ £45
+ Restricted places (10)
+
+ Description
+
+ One-to-One Poetry Surgeries with Jo Bell
+ Lower Shaw Farm
+ 10am to 4pm
+ £10
+
+ Description
+
+ Poetry Workshop with Jacqueline Saphra
+ Lower Shaw Farm
+ 10am to 12noon
+ £15
+
+ Description
+
+ Poetry Mosaics with ……
+ Lower Shaw Farm
+ 10am to 12noon
+ £15
+
+ Description
+
+
+ Rhythm and Rhyme: poetry and drumming for the young!
+ Lower Shaw Farm
+ 12.30 pm to 2pm
+ £10
+ MABEL’S HOUSE PARTY
+ Poetry Lunch with Nigel McGloughlin and Jacqueline Saphra
+ Lower Shaw Farm
+ 12.30 pm to 2pm
+ £10
+ Join us for
+ Poetry and Juggling
+ Lower Shaw Farm
+ 12.30 pm to 2pm
+ £10
+ Poetry with Cherry Potts
+ Central Library
+ 3pm to 4.30pm
+ £4 (£5)
+ Description
+ T S Eliot’s ‘The Wasteland’
+ Swindon Art Centre, Devizes Road, Swindon
+ 6pm to 7:30pm
+ £6 (5)
+ Description
+
+ Monday 5th October
+ Farewell Poetry Brunch with Jo Bell
+ Lower Shaw Farm
+ 10am to 12noon
+ £8
+ 
+
+http://www.swindontowncentre.co.uk/events/?contentID=2427
+
+* also, fun with time_keys, we find/create using time pk, (id, starttime) and create with time_key == event key string, then update it to the unique id.. does this always work? Cineworld had a bunch of dupes, with eventid key and uniqueid key
+
+
+select t1.event_id, t1.start_time, t2.start_time from times t1 join times t2 on t1.event_id = t2.event_id and t1.start_time = t2.start_time + interval '1 hour' and t1.event_id not like '%cineworld%';
+
+# unless we tell pg that its a "datetime with timezone", it will ignore any timezone spec, assume 
+http://www.postgresql.org/docs/current/static/datatype-datetime.html
+
+In a literal that has been determined to be timestamp without time zone, PostgreSQL will silently ignore any time zone indication. That is, the resulting value is derived from the date/time fields in the input value, and is not adjusted for time zone.
+
+For timestamp with time zone, the internally stored value is always in UTC (Universal Coordinated Time, traditionally known as Greenwich Mean Time, GMT). An input value that has an explicit time zone specified is converted to UTC using the appropriate offset for that time zone. If no time zone is stated in the input string, then it is assumed to be in the time zone indicated by the system's TimeZone parameter, and is converted to UTC using the offset for the timezone zone.
+
+When a timestamp with time zone value is output, it is always converted from UTC to the current timezone zone, and displayed as local time in that zone. To see the time in another time zone, either change timezone or use the AT TIME ZONE construct (see Section 9.9.3).
+
+Conversions between timestamp without time zone and timestamp with time zone normally assume that the timestamp without time zone value should be taken or given as timezone local time. A different time zone can be specified for the conversion using AT TIME ZONE.
+
+
+TimeZone (string)
+
+Sets the time zone for displaying and interpreting time stamps. The built-in default is GMT, but that is typically overridden in postgresql.conf; initdb will install a setting there corresponding to its system environment. See Section 8.5.3 for more information.
+
+30.07.2015:
+
+https://developers.facebook.com/docs/facebook-login/access-tokens#extending
+
+
+19.07.2015:
+
+http://www.theocelot.co.uk/page/6/?s=Swindon&t=event&skw&scat=-1&sdate&saddress=Swindon&search=Search+Events
+
+Skyrides - Swindon, within 5 miles = 38 results
+www.goskyride.com/search/Results
+
+http://lanyrd.com/places/36796/ - Swindon (no events, add hackspace?)
+
+02.07.2015:
+
+http://httpd.apache.org/docs/2.2/howto/ssi.html
+
+how to use XBitHack with TT templated HTML?
+
+
+16.05.2015:
+
+Categories - Music, Film, Performing Arts, Fetes Fayres and ?, Clubs & Soceities, Family, Sport, Lectures, Business, Arts and Crafts, Markets
+
+sites:
+* http://www.barnescoaches.co.uk/holiday-diary
+* http://www.oldtownfestival.co.uk/whatson.html
+* https://www.facebook.com/ian.swisschalet/events
+* mycommunity.theiet.org/communities/home/181#.VVb4DGNwbMJ
+* www.open-lectures.co.uk/Search.html?searchword=swindon#.VVb5BWNwbMJ
+* www.swindonweb.com/event/index.asp?m=311
+www.walkinginwiltshire.org.uk/swindon.php
+vas-swindon.org.uk/search-results?mact=vcodirectory%2Cm2bdfc%2Csearch%2C0&m2bdfcreturnid=24&m2bdfcwhat=organisation&m2bdfcsearchmode=advanced&m2bdfcdetailpage=search-results&m2bdfccompare_name=1&m2bdfcfield_name=&m2bdfcsubmitsearch=
+
+Preferences - current month / today + 30 days
+
+time url? (for cineworld booking urls, per time instance)
+
+sqlite> select * from starred_events;
+3|818_10_00||2015-05-08 16:17:14
+3|1123_13_00||2015-05-08 16:17:16
+3|936_19_30||2015-05-08 16:17:32
+3|1125_20_00||2015-05-08 16:17:35
+3|1106_10_00||2015-05-08 16:17:47
+3|932_19_30||2015-05-08 16:18:25
+3|895_19_00||2015-05-08 16:21:47
+3|1040_23_00||2015-05-08 16:21:50
+3|894_19_30||2015-05-08 16:22:46
+3|778_17_30||2015-05-08 16:23:08
+3|780_19_00||2015-05-08 16:23:14
+3|1150_09_00||2015-05-09 11:59:44
+
+
+28.04.2015:
+
+Add "created_on" field to Events, so that post import we can tweet the recent additions (and list additions by date added?)
+
+Added - "favourites" page showing tagged events (should be "My Calendar"?)
+
+
+05.08.2014:
+
+To parse: http://www.swindon-cricklade-railway.org/events.php#top, explictly section beginning "2014 Special Events".
+
+Types of callback:
+* social_login - user logging in, may not have ever heard of them - find/create user, start login session
+* social_link - user adding a new social whatsit, add to existing user in session (shouldnt be able to do this when logged out) - dont change session, just add to social_user table
+
+Knightout pubs:
+Rolleston - lots of sources
+Greyhound - have a facebook post list - https://www.facebook.com/thegreyhoundpubswindon?fref=ts
+Swiss Chalet (Quiz thursdays) - some fb events?
+Bakers Arms, Beechcroft Road - ?
+Royal Oak, Devizes Road - ?
+Liden Arms - ?
+Castle - fb post image
+The Albion, Bridge Street - ?
+Shield and Dagger - ?
+Wheatsheaf, Ermin Street
+Plough Inn, Devizes Road
+Ferndale Club, Ferndale Road
+20 at the Kings
+
+
+facebook.com/bignickskaraoke
+
+
+01.08.2014:
+
+domains?
+swindonevent.co.uk - owned by swindonweb, unused!
+whatsonswindon.co.uk - owned since 2003 by whatson, but all "coming soon"
+swindonevents.co.uk - not owned
+swindonian.co.uk - simon dooner ? empty
+theswindonian.co.uk - not registered
+
+more music:
+http://www.swindonmusicfestival.co.uk/
+http://www.swindonmusicscene.co.uk/portal/ - history?
+http://www.bandmix.co.uk/swindon/ - ?
+
+http://www.talkswindon.org/index.php?topic=5311.60
+[And by the way, to save you all a quid at Companies House, the "group of local businessmen" who have formed GVS Entertainment Ltd. to lease the old Mecca Bingo Hall on Regent's Circus are Stephen Causer, Gregory Spencer and Vincenzo Mancari, who all seem to live at 28, Morley Street, Swindon. (like in Friends then?)]
+And, fact fans, Steve Causer was the chap employed by the council to help deliver Radio 1 Big Weekend. I think he's still drawing a wage for arts development.
+
+Steve Causer (28 Morley St) - owns experienceswindon.co.uk
+    Relevant dates:
+        Registered on: 27-Jul-2008
+        Expiry date:  27-Jul-2014
+        Last updated:  27-Jul-2012
+
+
+26.05.2014:
+
+Added monthly pages/urls, with previous/next links
+SwindonBC now picks to 60 days worth (only one minor bug to fix!)
+Links on pages now go to event URL, should probably expand to the detailed view, including the link
+Added Manual to events.conf (oops)
+
+Need icons for genres?
+
+
 14.01.2014:
 
 http://www.theocelot.co.uk/modules/extcal/month.php?year=2014&month=1&cat=2&county_id=62&town_id=5&venue_id=0
@@ -18,40 +460,49 @@ eventful.com/concerts?geo=city_id:440266
 
 www.discoveringbritain.org/walks/region/south-west-england/cotswold-canals.html
 
-Swindon music venues:
-* The Rolleston - https://www.facebook.com/pages/Status-Promotions-Live-Music-at-The-Rolleston/357999137646307?id=357999137646307&sk=events
-* The Vic - http://www.thevicswindon.com/get/main, https://www.facebook.com/pages/Green-Man-Music-Promotions/187343001292228?id=187343001292228&sk=events, https://www.facebook.com/groups/thevicswindon/events
+VENUES WITH NO SOURCE:
+
 * Queen's Tap - https://www.facebook.com/pages/The-Queens-Tap-Swindon/161343323898027 (out of date), http://www.lemonrock.com/queenstap?page=gigs
-* Riffs Bar - http://www.riffsbar.com/gig-guide/, https://www.facebook.com/pages/Riffs-Bar/140297122681994?id=140297122681994&sk=events
-* Bakers Arms, Stratton? - https://www.facebook.com/pages/The-Bakers-Arms-Stratton/113168375396653
-* Beehive - http://www.bee-hive.co.uk/pfs.mhtml?eng_no=0&override=true&mode=search&count-num=110376
+* Bakers Arms, Stratton? - https://www.facebook.com/pages/The-Bakers-Arms-Stratton/113168375396653 (no events on page)
 * Castle - https://www.facebook.com/thecastleswindon - Ken Knightouts magazine (fb page not the pub owner?)
 * Baker Street - https://www.facebook.com/bakerstreetswindon, ilovebakerstreet.com, https://twitter.com/BakerStreetSwin - no events lists?
-* Kings - http://www.20atthekings.co.uk/events.htm
-* Merlin - https://www.facebook.com/MerlinPub
-* Roaring Donkey - https://www.facebook.com/photo.php?fbid=333222343484792&set=a.312183182255375.1073741825.167439900063038&type=1&theater
+* Merlin - https://www.facebook.com/MerlinPub (can't find any evidence of music here at all).
+* Roaring Donkey - https://www.facebook.com/photo.php?fbid=333222343484792&set=a.312183182255375.1073741825.167439900063038&type=1&theater (no current events on facebook) - in ken knightout - post posters of events to fb. - https://twitter.com/RoaringDonkey
 * Wheatsheaf, Stratton - https://www.facebook.com/pages/The-Wheatsheaf/156351587716108
-* Byrons - https://www.facebook.com/pages/Byrons-Wine-Bar/291718187603335?fref=ts, 
-* Royal Oak - http://www.theroyaloakswindon.co.uk/, https://www.facebook.com/royal.oak.779/events
-* Tap & Barrel - http://www.thetapandbarrel.co.uk/events, https://www.facebook.com/tapn.barrelswindon?fref=ts - Ken Knightouts magazine - person
-* Town Gardens - http://www.swindon.gov.uk/lc/lc-arts/Pages/lc-arts-oldtownbowl.aspx, https://www.facebook.com/bowlconcerts
-* MECA - http://www.mecaswindon.co.uk/whats-on-meca-swindon.aspx, facebook.com/swindonmeca
-* Wyvern - https://www.facebook.com/WyvernTheatre?fref=ts, https://www.wyverntheatre.org.uk/Online/whatson?menu_id=3239D7DE-2D9C-40D7-A898-7CBD1FEE12E8&sToken=1%2C4ed1f208%2C52c73b5a%2C49622C61-10C7-4E17-894C-3C0EAF033CCA%2Clh3ZG1tMR%2FeSYrqG9lRCJeN80rA%3D
-* Arts Centre - http://www.swindon.gov.uk/events/pages/eventslisting.aspx?v=Arts%20Centre
+* Byrons - https://www.facebook.com/pages/Byrons-Wine-Bar/291718187603335?fref=ts, (no current events on facebook)
+* Royal Oak - http://www.theroyaloakswindon.co.uk/, https://www.facebook.com/royal.oak.779/events - old events on fb page.. wonder if newer ones are friends only?
+* New Inn - ?? https://www.facebook.com/royal.oak.779/events - person
+* Tap & Barrel - http://www.thetapandbarrel.co.uk/events, https://www.facebook.com/tapn.barrelswindon?fref=ts - Ken Knightouts magazine - fb person account
 * The Crown - http://www.thecrownatstratton.co.uk/, https://www.facebook.com/crowninn.stratton?fref=ts - person
 * GW Swindon (GW Acoustic Showcase)
-* New Inn - ?? https://www.facebook.com/royal.oak.779/events - person
-* Swiss Chalet - https://www.facebook.com/swisschalet.gorsehill?fref=ts - ken knightout - person 
 * The Haydon (Wick) Club?
 * The Woodlands Edge - http://www.swindonweb.com/event/?m=40&c=10185&v=48&t=Live+Music+at+Woodlands+Edge, http://www.hungryhorse.co.uk/pubs/woodlands-edge-swindon
-* The Greyhound  - https://www.facebook.com/thegreyhoundpubswindon?fref=ts, https://www.facebook.com/GreyhoundPubSwindon?fref=ts  on Ken Knightouts magazine
-* Carters Rest, Wroughton - https://www.facebook.com/events/630079440382546/?ref=ts&fref=ts
-* Goldfinger Tavern, Highworth - https://www.facebook.com/goldfingertavern?fref=ts
+* The Greyhound  - https://www.facebook.com/thegreyhoundpubswindon?fref=ts (personal fb account, https://www.facebook.com/GreyhoundPubSwindon?fref=ts  on Ken Knightouts magazine 
+* Carters Rest, Wroughton - https://www.facebook.com/events/630079440382546/?ref=ts&fref=ts - single event by darren hunt, see DH below.
+* Goldfinger Tavern, Highworth - https://www.facebook.com/goldfingertavern?fref=ts - fb page, but no events
 * The Windmill, Swindon - http://www.gkmeetandeat.co.uk/locations/windmill-freshbrook, 
 * The Sun Inn - https://www.facebook.com/suninn.coate.5/events
-* The Village Tavern - https://www.facebook.com/thetoothillvillagetavern/events
+* The Village Tavern - https://www.facebook.com/thetoothillvillagetavern/events - only 
+
+VENUES WITH KNOWN SOURCE LOCATION, BUT NO SCRAPER:
+* Kings - http://www.20atthekings.co.uk/events.htm
 * The Plough Inn, Old town - http://www.theplougholdtown.co.uk/jazz_events.htm
+
+DONE:
+* The Rolleston - https://www.facebook.com/pages/Status-Promotions-Live-Music-at-The-Rolleston/357999137646307?id=357999137646307&sk=events
+* The Vic - http://www.thevicswindon.com/get/main, https://www.facebook.com/pages/Green-Man-Music-Promotions/187343001292228?id=187343001292228&sk=events, https://www.facebook.com/groups/thevicswindon/events
+* Riffs Bar - http://www.riffsbar.com/gig-guide/, https://www.facebook.com/pages/Riffs-Bar/140297122681994?id=140297122681994&sk=events
+* Beehive - http://www.bee-hive.co.uk/pfs.mhtml?eng_no=0&override=true&mode=search&count-num=110376
+* MECA - http://www.mecaswindon.co.uk/whats-on-meca-swindon.aspx, facebook.com/swindonmeca
 * Brookhouse farm - https://www.facebook.com/brookhouse.farm/events - 421347267969378
+* Swiss Chalet - https://www.facebook.com/swisschalet.gorsehill?fref=ts - ken knightout - person 
+
+
+
+Swindon music venues:
+* Town Gardens - http://www.swindon.gov.uk/lc/lc-arts/Pages/lc-arts-oldtownbowl.aspx, https://www.facebook.com/bowlconcerts - no events up for this year yet!
+* Wyvern - https://www.facebook.com/WyvernTheatre?fref=ts, https://www.wyverntheatre.org.uk/Online/whatson?menu_id=3239D7DE-2D9C-40D7-A898-7CBD1FEE12E8&sToken=1%2C4ed1f208%2C52c73b5a%2C49622C61-10C7-4E17-894C-3C0EAF033CCA%2Clh3ZG1tMR%2FeSYrqG9lRCJeN80rA%3D
+* Arts Centre - http://www.swindon.gov.uk/events/pages/eventslisting.aspx?v=Arts%20Centre
 * The Venue, havelock sq.
 
 * sources
@@ -74,25 +525,31 @@ Swindon music venues:
 
 
 * Acts
+DONE:
 ** David Marx and the AK-Poets - http://akpoets.weebly.com/upcoming-gigs.html, https://www.facebook.com/pages/The-AK-Poets/118160368242312 - DONE
-** Batteleurs - http://www.bateleurs.co.uk/live.html
-** Miss Rosie - http://www.missinrosie.co.uk/gig-guide, http://www.missinrosie.co.uk/gig-guide
 ** Rumour Shed - https://www.facebook.com/rumourshed?fref=ts 
-** Timid Deer (?) - https://soundcloud.com/timiddeer
 ** Jim Blair / band Hip Route - http://www.reverbnation.com/hiproute, https://www.facebook.com/pages/Hip-Route/6224999386?fref=ts, https://www.facebook.com/pages/Hip-Route/6224999386?id=6224999386&ref=ts&sk=events - DONE
-** Faye Rogers (?) - https://www.facebook.com/fayelaura7
+** The Nomarks - https://www.facebook.com/TheNomarks # 134801383238517
+
+ACTS THAT NEED PARSING:
+** Batteleurs - http://www.bateleurs.co.uk/live.html
+** Miss Rosie - http://www.missinrosie.co.uk/gig-guide
 ** Ode & the Bebops - http://www.skiffleband.org.uk/gig_list.html
 ** Ells - http://ells.biz/gigs/
 ** Shepherd's Pie (heavy rock) - http://www.shepherdspierock.co.uk/gigs
-** Shred - http://shredband.webs.com/, http://darrenhuntsolo.webs.com/, http://darrenhuntsolo.webs.com/gigs-2014, https://www.facebook.com/ShredBand?fref=ts
 ** Built for Comfort (Blues) - http://www.builtforcomfortbluesband.co.uk/
-** Hyperbolics - https://www.facebook.com/pages/The-Hyperbolics/116939518343253
 ** Breeze - http://www.breezerock.com/
 ** Gaz Brookfield (Bristol) - http://gazbrookfield.com/gigs.php
 ** No Middle Ground (Covers) - http://www.nomiddleground.co.uk/
 ** Switch - http://www.thebandswitch.co.uk/shows/
 ** Drew Bryant - http://www.reverbnation.com/drewbryant
-** The Nomarks - https://www.facebook.com/TheNomarks # 134801383238517
+
+NO KNOWN SOURCE:
+** Timid Deer (?) - https://soundcloud.com/timiddeer
+** Faye Rogers (?) - https://www.facebook.com/fayelaura7
+** Shred - http://shredband.webs.com/, https://www.facebook.com/ShredBand?fref=ts - no current events
+** Hyperbolics - https://www.facebook.com/pages/The-Hyperbolics/116939518343253 - no current events in fb
+
 ** George Andrews - DJ - https://www.facebook.com/george.andrews.9085
 ** Chris O'Leary, Liam Leary - https://www.facebook.com/chrisjohnoleary
 ** Switch - https://www.facebook.com/thebandSwitch/events, https://www.facebook.com/thebandSwitch/app_123966167614127 (bandsintown)

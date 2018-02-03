@@ -22,14 +22,14 @@ use Geo::Distance;
 
 use Encode;
 
-use lib '/mnt/shared/projects/events/scrapers/lib';
+use lib '/mnt/shared/projects/events/scrapers/lib', '/usr/src/events/scrapers/lib';
 # Schema:
-use lib '/mnt/shared/projects/events/lib';
+use lib '/mnt/shared/projects/events/lib', '/usr/src/events/lib';;
 #use lib '/usr/src/perl/pubboards/lib'; 
 use PubBoards::Schema;
 
-has 'app_cwd' => ( is => 'ro', default => sub {'/mnt/shared/projects/events/app/'});
-has 'scrapers' => ( is => 'ro', default => sub {'/mnt/shared/projects/events/scrapers/events.conf'});
+has 'app_cwd' => ( is => 'ro', default => sub { ($ENV{EVENTS_HOME} || '/mnt/shared/projects/events') . '/app/'});
+has 'scrapers' => ( is => 'ro', default => sub { ($ENV{EVENTS_HOME} || '/mnt/shared/projects/events') . '/scrapers/events.conf'});
 #has 'static_url' => ( is => 'ro', default => sub {'http://192.168.42.2:7778'});
 has 'host' => (is  => 'ro', default => sub {'http://swindonguide.org.uk' });
 has 'base_uri' => (is  => 'ro', default => sub {''});

@@ -11,6 +11,7 @@
     -moz-text-overflow: ellipsis;
     -webkit-text-overflow: ellipsis;
     padding: 3px 3px 3px 3px;
+    font-size: large;
 }
 
 /* reset some kickstart stuff... */
