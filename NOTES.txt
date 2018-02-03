@@ -16,9 +16,14 @@ Geocoding of addresses (mostly facebook)
 * Address::PostCode::UK - frontend to http://uk-postcodes.com/ - website doesnt work? (keeps getting cloudflare pages)
 * Geo::UK::Postcode ? has manual geolocation instructions by downloading https://www.ordnancesurvey.co.uk/business-and-government/products/code-point-open.html ?
 ** using combo of mapquest and geo::uk::postcode
+
 Post code lat/lng: (PO80QE)  - doesnt exist in OS data??
+Post code lat/lng: (SP79PL)  
+Post code lat/lng: (DT95NR)  
+Post code lat/lng: (DT28PX)  
+Post code lat/lng: (SP47PH)  
 
-
+https://developer.mapquest.com/documentation/open/nominatim-search/
 
 14.02.2017:
 
