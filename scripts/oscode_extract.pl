@@ -12,7 +12,9 @@ my %pc_data = ();
 my $iterator = $code_point_open->read_iterator(include_lat_long => 1);
 while ( my $pc = $iterator->() ) {
     print Dumper($pc);
-    $pc_data{ $pc->{Postcode} } = [ $pc->{Latitude}, $pc->{Longitude} ];
+    next if $pc->{Postcode} !~ /^sn/i;
+    $pc->{Postcode} =~ s/\s+//g;
+    $pc_data{ uc( $pc->{Postcode} ) } = [ $pc->{Latitude}, $pc->{Longitude} ];
 }
 
 nstore \%pc_data, 'oscodes.store';
