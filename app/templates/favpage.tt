@@ -1,0 +1,5 @@
+[% WRAPPER wrapper.tt %]
+  <h2>User: [% user.user_name | html %]</h2>
+  <h3>Favourites</h3>
+  [% INCLUDE events_by_day.tt events = favs_by_day venue_link = 1 %]
+[% END %]

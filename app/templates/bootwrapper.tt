@@ -3,7 +3,7 @@
 <!--[if gt IE 9]><!--><html class="no-js"><!--<![endif]-->
 <html>
   <head>
-
+    <!--#include virtual="/~castaway/_includes/ga.html" -->
 	<meta charset="UTF-8" />
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> 
 	<meta name="viewport" content="width=device-width, initial-scale=1.0"> 
@@ -44,7 +44,7 @@
 
      /* Embeds the buttons into the container oa_social_login_container */
      var _oneall = _oneall || [];
-     _oneall.push(['social_login', 'set_providers', ['blogger', 'disqus', 'github', 'instagram', 'openid', 'twitter', 'wordpress', 'yahoo']]);
+     _oneall.push(['social_login', 'set_providers', ['blogger', 'disqus', 'github', 'instagram', 'livejournal', 'openid', 'stackexchange', 'twitter', 'wordpress', 'yahoo']]);
      _oneall.push(['social_login', 'set_callback_uri', your_callback_script]);
      _oneall.push(['social_login', 'do_render_ui', 'oa_social_login_container']); 
   </script>
@@ -59,24 +59,5 @@
      };
    </script>
    <script type="text/javascript" src="[% static_uri %]/js/events.js"></script>
-   <script type="text/javascript">
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-  ga('create', 'UA-91008352-1', 'auto');
-  ga('send', 'pageview');
-
-   </script>
-   <script src="[% static_uri %]/js/echo.js">
-   </script>
-   <script>
-      echo.init({
-        callback: function (element, op) {
-          console.log(element, 'has been', op + 'ed')
-        }
-      });
-   </script>
   </body>
 </html>

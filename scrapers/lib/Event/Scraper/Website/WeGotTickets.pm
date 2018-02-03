@@ -13,13 +13,13 @@ use base 'Event::Scraper::Website::Swindon';
 sub get_events {
     my ($self, $source_info) = @_;
 
-    my $html = get($source_info->{url});
+    my $html = get($source_info->{uri});
     my $tree = HTML::TreeBuilder->new_from_content($html);
 #    $tree->objectify_text;
     $tree->dump;
 
     my $events;
-    state $formatter = DateTime::Format::Strptime->new(pattern => "%A %d %B, %Y", on_error => 'croak');
+    state $formatter = DateTime::Format::Strptime->new(pattern => "%A %d %B, %Y", on_error => 'croak', time_zone => 'Europe/London');
     for my $listing ($tree->look_down(class => qr/ListingFullWidth/)) {
         print STDERR $listing->as_HTML;
         my $l_date = $listing->look_down(class => qr/ListingDate/);

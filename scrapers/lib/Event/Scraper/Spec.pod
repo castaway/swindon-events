@@ -42,6 +42,10 @@ FIXME: This was my idea, over Jess's exception, in the first place, and now I'm 
 
 The last time we noticed the information about this event changing.
 
+=item image_url
+
+The URL of an image representing the gig.
+
 =item venue
 
 Information about the venue the event will be at.  FIXME: This is a hashref in it's own right, document it properly.

@@ -1,5 +1,5 @@
 # -*- perl; tab-width: 2 -*-
-package Event::Scraper::Website::Beehive;
+package Event::Scraper::Website::Victoria;
 $|=1;
 use strictures 1;
 use HTML::TreeBuilder;
@@ -7,24 +7,90 @@ use LWP::Simple 'get';
 use DateTime;
 #use DateTime::Event::Recurrence;
 use Data::Dump::Streamer 'Dump', 'Dumper';
-use Time::ParseDate;
+use DateTime::Format::Strptime;
+
+use feature 'state';
+
 
 sub get_events {
   my ($self, $source_info) = @_;
 
   my $url = $source_info->{uri};
 
-  Dump($source_info);
-  my $html = get($url);
-  if(!$html) {
-      warn "Can't fetch url: $url";
-      return [];
-  }
+  my $html = get($url) or die "Couldn't get $url";
   my $root = HTML::TreeBuilder->new_from_content($html);
   
   my @ret;
+  #$root->dump;
+  
+  my $top_tag = $root->look_down(_tag => 'div', 'id' => 'giggity');
+  for my $child ($top_tag->content_list) {
+      next if $child->attr('_tag') eq 'p';
+#      $child->dump;
 
-  for my $table_tag ($root->look_down(_tag => 'table', 'width' => '85%')) {
+      # @0.1.0.5.0.1.0 : top_tag
+      # @0.1.0.5.0.1.0.0.0.0 : image x
+      # @0.1.0.5.0.1.0.0.1.0.0 : date
+      # @0.1.0.5.0.1.0.0.1.1.0 : name x
+      # @0.1.0.5.0.1.0.1.0 : desc x
+      # @0.1.0.5.0.1.0.2.1.0 : band website? <-
+      # @0.1.0.5.0.1.0.3.1.0 : start (doors open) time
+      # @0.1.0.5.0.1.0.4.1.0 : price (needs second-level parsing) <-
+      # FIXME: Some have a tickets link.
+      
+      my $event;
+      $event->{image} = $child->address('.0.0.0')->attr('src');
+      $event->{image} = URI->new_abs($event->{image}, $url);
+      $event->{event_name} = $child->address('.0.1.1.0')->as_text;
+      $event->{event_desc} = join ('', map {ref $_ ? $_->as_HTML : $_}
+				   $child->address('.1.0')->content_list);
+      if ($child->address('.0.2.1.0')) {
+          my @websites = $child->address('.0.2.1.0')->look_down(_tag => 'a');
+          
+          $event->{event_url} =  @websites ? $websites[0]->attr('href') : $url;
+      }
+      $event->{event_url} ||= $url;
+      $event->{event_url} = URI->new_abs($event->{event_url}, $url);
+
+      ## This is currently required for the auto-eventid assignment... boo!
+      $event->{start_time} = $self->get_times($child->address('.0.1.0.0')->as_text,
+                                              $child->address('.3.1.0'  )->as_text)->[0]{start};
+#      $event->{times} = $self->get_times($child->address('.0.1.0.0')->as_text,
+#                                         $child->address('.3.1.0'  )->as_text);
+      $event->{venue} = { 
+          name => 'The Victoria',
+          street => '88 Victoria Road',
+          zip => 'SN1 3BD',
+          country => 'United Kingdom',
+      };
+      push @ret, $event;
+  }
+  return \@ret;
+}
+
+sub get_times {
+    my ($self, $date_str, $time_str) = @_;
+
+
+    my $input = "${date_str} ${time_str}";
+    $input =~ s/(\d+)(th|nd|rd|st)/$1/;
+    $input =~ s/\s+/ /g;
+    
+    my $dt_parser;
+    $dt_parser ||= DateTime::Format::Strptime->new(pattern => "%A %e %B %Y %H:%M",
+						   on_error => sub {
+						       my ($self, $errmsg) = @_;
+						       die "Can't parse $input: $errmsg";
+						   },
+	);
+
+    my $dt = $dt_parser->parse_datetime($input);
+    
+    ## We assume things end at closing time..
+    return [{ start => $dt, end => $dt->clone->set_hour(23)}];
+}
+
+__END__
     print "\n\n\n";
 
     my $event = {};

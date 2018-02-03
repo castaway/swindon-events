@@ -1,0 +1,27 @@
+Swindon Events
+==============
+
+Collect and display all live music and other events going on in
+Swindon in one coherent place.
+
+The aim is collect data ourselves, rather than relying on / insisting
+that others contribute data, as otherwise inevitably some data owners
+won't see the need to contribute their data everywhere.
+
+Members of the public and others will be invited to help contribute by
+the simple mechanism of uploading photos of venue posters to social
+networks or this website and tagging them appropriately. Website
+members are then invited to create events based on the posters.
+
+Initial data collection is done via public facebook event collection
+and website scraping.
+
+Current view:
+
+* http://swindonguide.org.uk
+* http://swindonguide.org.uk/static/events.ical
+
+Sources:
+
+* https://github.com/castaway/swindon-events/blob/master/NOTES.txt (not yet all implemented)
+

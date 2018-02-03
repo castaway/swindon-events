@@ -12,15 +12,19 @@ my $fbg;
 
 sub get_events {
   # user id may also be a page id.  We treat them just the same.
-  my ($self, $source_info) = @_;
-
+  my ($self, $source_info, $keyconf) = @_;
+  my %keys = $keyconf->getall();
   my $user_id = $source_info->{page_id};
 
   if (!$fbg) {
-    $fbg = Facebook::Graph->new(app_id => '570027493079452',
-                                secret => '609e2628de0a41caf38285a985c6cfce',
-                                postback => 'http://desert-island.me.uk/this-will-404/',
+      $fbg = Facebook::Graph->new(app_id => '1414208068886457',
+                                secret => 'a333d8306f17d56d9b584feef414e141',
+                                postback => 'http://desert-island.me.uk/events/fb/this-will-404/',
                                );
+#    $fbg = Facebook::Graph->new(app_id => '570027493079452',
+#                                secret => '609e2628de0a41caf38285a985c6cfce',
+#                                postback => 'http://desert-island.me.uk/this-will-404/',
+#                               );
 
     # Right.  So if it seems to be unauthorized, that means that the
     # auth timed out, copy-and-paste the URL listed as "auth uri", and
@@ -31,18 +35,24 @@ sub get_events {
 
 # perl -Ilib -MEvent::Scraper::Facebook -MData::Dumper -le'my $events = Event::Scraper::Facebook->get_events; print Dumper($events)' | less
 
-#    print "Auth uri: ", $fbg->authorize->uri_as_string, "\n";
-# http://desert-island.me.uk/this-will-404/?code=AQBdFQHI10zquwfKzVRZhc41XuIhDbCcpedIGVM6U3q8Cn0cp-r4j6dhNJrMqQ73vZb4kaTrGgK6XowlLOcp3dMrQhDxEbTOT5UYPSRK-M1nfrJQDrySnV3YHUHRm1dQ6FY_XQe5O2RuyOJXuLcu7UpzwFK_t3F_PzXFdrnYLOJ_hNtD-QK8Erso1nFSUzPkk6u2WiEm17apIbHNimpjMmFhVFxmhNUv4LfUOO6GYLFmmBI0UQ3q7RuvS377C8YUmD19K_WZCpQumzvTdPMG0YDX3owb67HdzcB9LrP1uFcQEXlHJDT_zJGq8QS421OyarE#_=_
-#    $fbg->request_access_token('AQCUdh1po37RhilQ69kXYlhPrCHT6ECOfK1VgxnIpn7q7Ii-pZIlmczjJHTho1HZG5OUcHZTX4lMKy-VainsUSdBvTksylvdhLx6AKIe8XaajEvlYZStkobwYk8wTX6kk-rd17rq7imDMN_BWrE_aWCnez84OQwk-dZ1aN7KMni2LDu1Llzkw6JrSj5RYAP9zSafVb4GVO0tq8kGuYfnO6J586FqEG9kyohwv1s1-ZKIFTJY7keYcPp9VP2wJxXr-3C6roV3pdagn8YkcpCqC0bRyt-oXxyk50hoMzCFPjdvC64KTjGBPeRI7sET1or1jPw');
+    print "Auth uri: ", $fbg->authorize->uri_as_string, "&response_type=token\n";
+# http://desert-island.me.uk/this-will-404/?code=AQAwnczGywRH7oEc0u_FxijlJC39VgFtef5jhhq7wAVFXARtaE6BtfboAVBo0TDYCMaVqMQhqhXDP9_KtWhzls7RR9I6TIBYrOS_nsafGQyshYnqYyIiA21smJRcF8vd7lDiS2X2gVszs6tRrhk8nYmXlhxQ6Yy38L
 
-    $fbg->access_token('CAAIGb948uZAwBAEqtBHm7iaPto5ebbHZBcdVEmVtZAFrVrLEYTZB7p9AqhrCa4eVFw0b1MiSxzxnUdkxlZAb4ZAAW3n9y1PBKNDPp3jbvVTUUoSRZC2ZCl1G6RaG7Qs0Jv4YK4tKFLHkIaVfwZBc7R4vBtq94y45KAd6AuIZAZA0bZAYKHOv2t5zIVcOQHxmtFBM56D5i6yhL2mZCJ5oRxoNzrFHJ');
-
-#    Dump $fbg;
+#      $fbg->access_token('EAAUGNvmVn7kBANeoMS5Kvj5ECVZA0HhIKwSqZBc4pG3KT3lYSWbiGfa3kEnNj4Ln9odGL90ZA88n0BhXlpq6H9pll47zfe3ZAZCZCm67JWTITqCxSml9ZABKC2pZBLv2Nv0U8xBhzZBmnsjULRYu4JIHM');
+      # GET graph.facebook.com/debug_token?input_token={token-to-inspect}&access_token={app-token-or-admin-token}
+#      print STDERR "Token: ", Data::Dumper::Dumper(\%keys);
+      $fbg->access_token($keys{'Keys'}{'Facebook'}{'access_token'});
+      $fbg->request_extended_access_token();
+      $keys{'Keys'}{'Facebook'}{'access_token'} = $fbg->access_token();
+      $keyconf->save_file(($keyconf->files())[0], \%keys);
+    Dump $fbg;
   }
 
   my @ret;
 
-  my $req = $fbg->query->find("$user_id/events")->limit_results(10);
+  my $last6mo = DateTime->now()->subtract(months => 2);
+  my $req = $fbg->query->find("$user_id/events")->where_since($last6mo->ymd);
+# limit_results(10);
   print $req->uri_as_string, "\n";
   my $events = $req->request->as_hashref;
   Dump $events;
@@ -71,16 +81,24 @@ sub expand_event {
   print "eid: $event_id\n";
 
   my $ret = {};
-  my $fb_event = $fbg->query->find($event_id)->request->as_hashref;
-#  print "From FB: ", Dumper($fb_event);
+  my $fb_event = $fbg->query->find($event_id)->
+      select_fields(qw/id name description place owner start_time end_time ticket_uri timezone updated_time/)->request->as_hashref;
+  print "From FB: ", Dumper($fb_event);
 
   my $st = $fb_event->{start_time};
   $st =~ s{\+\d{4}$}{};
   $ret->{start_time} = DateTime::Format::ISO8601->parse_datetime($st);
+  $ret->{start_time}->set_time_zone($fb_event->{timezone}) if $fb_event->{timezone};
   if($ret->{start_time} < $today) {
       return ();
   }
-  if(!$fb_event->{location} || $fb_event->{location} eq 'Swindon') {
+  if($fb_event->{end_time}) { 
+      my $et = $fb_event->{end_time};
+      $et =~ s{\+\d{4}$}{};
+      $ret->{end_time} = DateTime::Format::ISO8601->parse_datetime($et);
+      $ret->{end_time}->set_time_zone($fb_event->{timezone}) if $fb_event->{timezone};      
+  }
+  if(!$fb_event->{place}{name} || $fb_event->{place}{name} eq 'Swindon') {
       warn "Can't figure out location of event: $event_id";
       return ();
   }
@@ -91,16 +109,18 @@ sub expand_event {
   $ret->{event_name} = $fb_event->{name};
   $ret->{owner_id} = "fb:" . $fb_event->{owner}{id};
   $ret->{owner_name} = $fb_event->{owner}{name};
-  $ret->{tz_hint} = $fb_event->{timezone};
-  my $ut = $fb_event->{start_time};
+#  $ret->{tz_hint} = $fb_event->{timezone};
+  my $ut = $fb_event->{updated_time};
   $ut =~ s{\+\d{4}$}{};
   $ret->{updated_time} = DateTime::Format::ISO8601->parse_datetime($ut);
 
   ## Attempt to normalise venues:
-  my $sw_venue = __PACKAGE__->find_venue($fb_event->{location});
+  my $sw_venue = __PACKAGE__->find_venue($fb_event->{place}{name});
+  $sw_venue ||= __PACKAGE__->find_venue($fb_event->{owner}{name});
   
-  $ret->{venue} = $sw_venue || $fb_event->{venue};
-  $ret->{venue}{name} ||= $fb_event->{location};
+  $ret->{venue} = $sw_venue || $fb_event->{place}{location};
+  $ret->{venue}{name} ||= $fb_event->{place}{name};
+  $ret->{venue}{url} ||= '';
 
 #  print "expanded: ", Dumper($ret);
 

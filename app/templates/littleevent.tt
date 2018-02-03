@@ -1,1 +1,37 @@
-<div class="littleevent" style="[% eventstyle %]" title="[% event_row.name %]" >[% event.hour %] <a href="[% event_row.url %]">[% event_row.name | html %]</a> [% IF venue_link %]<a href="[% base_uri%]/venue/[% event_row.venue.url_name %]"> ([% event_row.venue.name %])</a>[% END %]</div>
+[% SET dist=0 %]
+[% IF event_row.venue.latitude; SET dist = calc_dist(event_row.venue.latitude, event_row.venue.longitude); END; %]
+
+<div class="col_12 littleevent [% e_time.cats.category_classes %]" style="[% eventstyle %]" title="[% event_row.name %]" >
+  <div class="col_1">
+    <span style="cursor:pointer" id="[% e_time.uniq_id %]" class="star-event">[% IF user.favourited(e_time.uniq_id); '&#9733;'; ELSE; '&#9734;'; END %]</span>
+     <span> [% e_time.hour %]</span>
+   </div>
+   <div class="col_6">
+     <i id="open_[% e_time.uniq_id %]" class="open_extra fa fa-plus-square"></i>
+     [% e_time.cats.category_icons %]
+     [% IF event_row.url %]
+       <a href="[% event_row.url %]">[% event_row.name | html %]</a>
+     [% ELSE %]
+       <span>[% event_row.name %]</span>
+     [% END %]
+  </div>
+  <div class="col_5">
+     [% IF event_row.venue %]<a href="[% base_uri%]/venue/[% event_row.venue.url_name %]"> [% event_row.venue.name %]</a>[% ELSE %]&nbsp;[% END %][% IF dist > 5 %]<i class="fa fa-road fa-lg" style="color: red;" title="Over 5 miles from Swindon Station ([% dist %]mi)"></i>[% END %]
+   </div>
+</div>
+<div class="col_12" style="display:none" id="extra_open_[% e_time.uniq_id %]">
+ <div class="col_1">&nbsp;</div>
+ <div class="col_6">
+[% event_row.description || '&nbsp;'%]
+ </div>
+ <div class="col_3">
+[% event_row.venue.address | html_line_break %]
+ </div>
+ <div class="col_2">
+[% IF event_row.venue.latitude %]
+<img src="[% static_uri %]/images/Blank.gif" class="lazy" alt="Map of location" data-echo="[% event_row.venue.minimap %]"/>
+<hr/>
+Miles from Swindon station: [% dist %]
+[% END %]
+ </div>
+</div>

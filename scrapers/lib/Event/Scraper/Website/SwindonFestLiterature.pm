@@ -68,10 +68,11 @@ sub get_events {
 #                my ($time, $date, $price) = split / • /, $info_para->address('.4');
 
                 # 10am – 4pm 11 May £5 adult • £4 child
+                # date month now optional, as missing from some subparts!
                 my ($hour, $minute, $ampm, $end_hour, $end_min, $end_ampm, $day, $month, $price) = 
                     $date_str =~ m/(\d+)\.?(\d+)?(am|pm)     # start time
                               (?:\D+?(\d+)\.?(\d+)?(am|pm))? # - optional end time
-                              \D+?(\d+)\s([A-Z]+)                # date month
+                              \D+?(\d+)?\s([A-Z]+)?          # date month
                               (.*)                           # prices
                               /xi
                     or die "Can't parse time-of-day '$date_str'";
@@ -87,10 +88,13 @@ sub get_events {
                 }
                 # '5 May'
 #                my ($day, $month) = $date =~ m/(\d+) ([A-Z]+)/i or die "Can't parse date '$date'";
+                $day ||= $page_date->day;
+                $month = $page_date->month_name;
+                    
                 die "Huh date: $date_str" if $month ne 'May';
                                 
-                $e->{start_time} = DateTime->new(year => 2014,
-                                                 month => 5,
+                $e->{start_time} = DateTime->new(year => $page_date->year,
+                                                 month => $page_date->month,
                                                  day => $day,
                                                  hour => $hour,
                                                  minute => $minute,
@@ -100,8 +104,8 @@ sub get_events {
                     );
                 $e->{tz_hint} = 'Europe/London';
                 if($end_hour) {
-                    $e->{end_time} = DateTime->new(year => 2014,
-                                                   month => 5,
+                    $e->{end_time} = DateTime->new(year => $page_date->year,
+                                                   month => $page_date->month,
                                                    day => $day,
                                                    hour => $end_hour,
                                                    minute => $end_min,

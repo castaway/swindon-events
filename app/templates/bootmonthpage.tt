@@ -1,13 +1,6 @@
-[% WRAPPER wrapper.tt %]
+[% WRAPPER bootwrapper.tt %]
     <h3>Swindon Events - [% start_date.month_name %], [% start_date.year %]</h3>
-
-    <ul id="category_list">
-     [% FOREACH cat IN categories %]
-      <li><input type="checkbox" value="[% cat.css %]" checked="checked"><label>[% cat.human %]</label></li>
-     [% END %]
-    <ul>
-
-    <div id="calendar" class="grid flex">
+    <div id="calendar" class="grid">
     [% INCLUDE events_by_day.tt events=events venue_link=1%]
     </div>
     <hr/>
@@ -17,5 +10,4 @@
      <li><a href="[% nav.value %]">[% nav.key %]</a></li>
    [% END %]
    </ul>
-
 [% END %]

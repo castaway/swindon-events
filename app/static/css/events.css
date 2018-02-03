@@ -1,7 +1,7 @@
 .fc-content div {
 }
 
-.littleevent {
+.littleevent div {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -9,6 +9,31 @@
     -icab-text-overflow: ellipsis;
     -khtml-text-overflow: ellipsis;
     -moz-text-overflow: ellipsis;
-    -webkit-text-overflow: ellipsis; 
+    -webkit-text-overflow: ellipsis;
+    padding: 3px 3px 3px 3px;
 }
 
+/* reset some kickstart stuff... */
+a { white-space:wrap; }
+a:link { color: blue }
+[class*="col_"] { margin: inherit }
+
+/* Cute little icons for the event categories */
+/* From  /cygdrive/s/projects/events/app/static/HTML-KS/css/fonts/font-awesome-4.2.0/css/, look up the .fa-yadda:before, and copy the content listed there.  Not the offical way to do it, but I don't really see a better one. */
+/* Poetry
+// Family
+// Performing Arts
+// Sport
+// Lectures
+// Businesss
+// Film */
+/*
+// Music
+// Clubs and Societies
+// Arts and Crafts
+// Markets
+*/
+
+#category_list li {
+    display: inline;
+}

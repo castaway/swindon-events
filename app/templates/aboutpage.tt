@@ -1,0 +1,20 @@
+[% WRAPPER wrapper.tt %]
+<h3>About</h3>
+<p>
+This calendar of Swindon events is produced from a collection of various sources. All calendar content is &copy; those sources.
+</p>
+<p>
+Event data may not be completely accurate, this is entirely down to the data collection methods (and fun with timezones!). Visit an events web page (click on the name) to confirm times and details.
+</p>
+<p>
+<a href="mailto:swindonguide@desert-island.me.uk">Email me</a> to suggest more data sources, or to ask me to remove yours from my list.
+</p>
+<h4>Sources</h4>
+<ul>
+[% FOREACH source IN sources %]
+  [% NEXT IF source.plugin == 'None' %]
+  <!-- [% USE Dumper; Dumper.dump(source) %] -->
+  <li>[% IF source.name != 'Manual Input' %]<a href="[% IF source.uri; source.uri; ELSIF source.plugin == 'Facebook'; 'https://facebook.com/' _ source.page_id; END %]">[% source.name | html %]</a>[% ELSE; source.name; END %]</li>
+[% END %]
+</ul>
+[% END %]

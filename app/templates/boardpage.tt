@@ -3,14 +3,56 @@
   [% FOREACH image = images %]
   <h3>[% image.title %] ([% image.original_date.ymd %])</h3>
   <div style="float:left;">
-    <a href="[% image.url_linkback %]"><img src="[% image.url_image %]"></a>
+    <a href="[% image.url_linkback %]"><img src="[% image.url_image %]" alt="[% image.title %]" width="400" height="600"></a>
   </div>
   <p>[% image.tags %]</p>
   <p>[% image.description %]</p>
   <div>
-   <form action="[% base_uri %]/ocr_image" method="post">
+   <form action="[% base_uri %]/transcribe_image" method="post">
      <input type="hidden" name="id" value="[% image.id %]" />
-     <textarea cols="30" rows="5" name="sign_text">[% image.sign_text %]</textarea>
+     <strong>Venue</strong>
+     [% IF !image.venue %]
+     <div>
+     <label>Venue: <input type="text" name="venue" list="venues"/></label>
+     <datalist id="venues">
+<!--
+       <label>
+       or select from the list:
+        <select name="venue">
+-->
+         [% FOREACH v = venues %]
+           <option value="[% v.name %]"></option>
+         [% END %]
+<!--
+        </select>
+       </label>
+-->
+      </datalist>
+      </div>
+      [% ELSE %]
+      <p>[% image.venue.name %]</p>
+      <input type="hidden" name="venue" value="[% image.venue.name %]"/>
+     <strong>Events</strong>
+      <p>Existing:</p>
+      [% SET events = image.venue.events_rs; SET count = 0; %]
+      <ul>
+      [% WHILE (event = events.next);
+        SET count = count + 1; LAST IF count >= 10; %]
+        [%# USE Dumper; Dumper.dump(event.times_rs.first) %]
+        <li>[% event.times_rs.first.start_time.ymd %] [% event.times_rs.first.start_time.hms %] - [% event.name %]</li>
+      [% END %]
+      </ul>
+      [% END %]
+     <strong>Add Event</strong>
+     <div><label>Event Name: <input type="text" name="event_name" required/></label></div>
+     <div><label>Date: <input type="date" name="event_date" required/></label></div>
+     <div><label>Start Time: <input type="time" name="start_time" required/></label></div>
+     <div><label>End Time: <input type="time" name="end_time"/></label></div>
+     <!--
+     <div><label>Description:<textarea cols="30" rows="5" name="event_desc"></textarea></label></div>
+     -->
+     <div><label>Weekly event: <input type="checkbox" name="event_weekly"/></label></div>
+     <div><label>Last event done: <input type="checkbox" name="processing_done"/></label></div>
      <input type="submit" name="Submit" value="Submit" />
    </form>
   </div>
