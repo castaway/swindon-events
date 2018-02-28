@@ -16,6 +16,7 @@ binmode \*STDOUT, ':utf8';
 use lib '/mnt/shared/projects/events/lib', '/usr/src/events/lib';
 use PubBoards::Schema;
 has 'app_cwd' => ( is => 'ro', default => sub { ( $ENV{EVENTS_HOME} || '/mnt/shared/projects/events' ) . '/scripts/'});
+has 'max_tweet_length' => ( is => 'ro', default => sub { 280; } );
 has 'config' => (is => 'ro',
                  lazy => 1,
                  default => sub {
@@ -55,8 +56,6 @@ has 'schema' => (is => 'ro',
 has 'twitter_api' => (is => 'ro',
                       lazy => 1,
                       default => sub {
-                          # swindonguide@Twitter 2785897262-sa1JGlKiiOU93mCxTejSOfJEDj3tdfmRYf80L2F 9tgBBzx4fkGpiNrjwlmqJyCbXi4gwu2DdJT0fis5u5un7
-
                           Twitter::API->new_with_traits(
                               traits =>
                               'Enchilada',
@@ -68,7 +67,7 @@ has 'twitter_api' => (is => 'ro',
                               ),
                               access_token => '2785897262-sa1JGlKiiOU93mCxTejSOfJEDj3tdfmRYf80L2F',
                               access_token_secret => '9tgBBzx4fkGpiNrjwlmqJyCbXi4gwu2DdJT0fis5u5un7',
-                              source => "twirssi",        # XXX
+                              source => "Twitter::API",        # XXX
                               ssl    => 1,
                       );
                       });
@@ -106,7 +105,7 @@ my $add_time = 0;
         if ($n_events) {
             $tweet_text .= ', ';
         }
-        my $remaining_length = 140 - $t_conf{short_url_length}+1 - length($tweet_text);
+        my $remaining_length = $self->max_tweet_length - $t_conf{short_url_length}+1 - length($tweet_text);
         #print STDERR "remaining length: $remaining_length, valid times: ", 0+@times, "\n";
         for my $time (@times) {
 #            printf STDERR "Avail :%02d [%d] %s at %s\n", $time->start_time->minute, length($time->event->name), $time->event->name, $time->event->venue->name;
