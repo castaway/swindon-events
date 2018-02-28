@@ -56,17 +56,21 @@ has 'schema' => (is => 'ro',
 has 'twitter_api' => (is => 'ro',
                       lazy => 1,
                       default => sub {
+                          my $self = shift;
                           Twitter::API->new_with_traits(
                               traits =>
                               'Enchilada',
                               (
                                grep tr/a-zA-Z/n-za-mN-ZA-M/, map $_,
-                               pbafhzre_xrl => 'OMINiOzn4TkqvEjKVioaj',
+                               pbafhzre_xrl => 
+                               $self->keys->{Keys}{Twitter}{pbafhzre_xrl},
                                pbafhzre_frperg =>
-                               '0G5xnujYlo34ipvTMftxN9yfwgTPD05ikIR2NCKZ',
+                               $self->keys->{Keys}{Twitter}{pbafhzre_frperg},
                               ),
-                              access_token => '2785897262-sa1JGlKiiOU93mCxTejSOfJEDj3tdfmRYf80L2F',
-                              access_token_secret => '9tgBBzx4fkGpiNrjwlmqJyCbXi4gwu2DdJT0fis5u5un7',
+                              access_token => 
+                              $self->keys->{Keys}{Twitter}{access_token},
+                              access_token_secret => 
+                              $self->keys->{Keys}{Twitter}{access_token_secret},
                               source => "Twitter::API",        # XXX
                               ssl    => 1,
                       );
