@@ -138,6 +138,7 @@ my $add_time = 0;
         $tweet_text_debug =~ s/([^ -~])/sprintf "\\x%02x", ord $1/ge;
         print STDERR "DEBUG: $tweet_text_debug\n";
 #        print STDERR "Unlisted: ", 0+@times, "\n";
-        $self->twitter_api->update($tweet_text);
+        my $res = $self->twitter_api->update($tweet_text);
+        print STDERR Dumper($res);
     }
 }
