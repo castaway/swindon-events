@@ -15,7 +15,7 @@ binmode \*STDOUT, ':utf8';
 
 use lib '/mnt/shared/projects/events/lib', '/usr/src/events/lib';
 use PubBoards::Schema;
-has 'app_cwd' => ( is => 'ro', default => sub { $ENV{EVENTS_HOME} || '/mnt/shared/projects/events' . '/scripts/'});
+has 'app_cwd' => ( is => 'ro', default => sub { ( $ENV{EVENTS_HOME} || '/mnt/shared/projects/events' ) . '/scripts/'});
 has 'config' => (is => 'ro',
                  lazy => 1,
                  default => sub {
@@ -59,7 +59,7 @@ has 'twitter_api' => (is => 'ro',
 
                           Twitter::API->new_with_traits(
                               traits =>
-                              'Enchilada'
+                              'Enchilada',
                               (
                                grep tr/a-zA-Z/n-za-mN-ZA-M/, map $_,
                                pbafhzre_xrl => 'OMINiOzn4TkqvEjKVioaj',
