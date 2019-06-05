@@ -3,7 +3,7 @@ package Event::Scraper::Website::SwindonTheatres;
 use strict;
 use warnings;
 
-use LWP::Simple 'get';
+use LWP::UserAgent;
 use HTML::TreeBuilder;
 use DateTime;
 use DateTime::Format::Strptime;
@@ -21,13 +21,21 @@ use base 'Event::Scraper::Website::Swindon';
 my $formatter = DateTime::Format::Strptime->new(
     pattern => '%a %d %b %Y - %l.%M %p',
     on_error => 'croak', time_zone => 'Europe/London');
+
 sub get_events {
     my ($self, $source_info) = @_;
 
     my @ret;
 
     my $top_uri = $source_info->{uri};
-    my $page = get($top_uri);
+    my $ua = LWP::UserAgent->new(agent => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.97 Safari/537.36 Vivaldi/1.94.1008.44');
+    my $response = $ua->get($top_uri);
+    my $page;
+    if($response->is_success) {
+        $page = $response->decoded_content;
+    } else {
+        die "Failed to get $top_uri, ", $response->status_line;
+    }
     p $top_uri;
 #    p $page;
     return [] if !$page;
@@ -44,7 +52,13 @@ sub get_events {
 
     foreach my $page_uri (@sub_pages) {
         my $s_time = time();
-        my $page = get($page_uri);
+        my $response = $ua->get($page_uri);
+        my $page;
+        if($response->is_success) {
+            $page = $response->decoded_content;
+        } else {
+            die "Failed to get $page_uri, ", $response->status_line;
+        }
         p $page_uri;
 #        p $page;
         next if !$page;
