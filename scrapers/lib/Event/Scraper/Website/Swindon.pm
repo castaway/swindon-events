@@ -654,6 +654,14 @@ sub venues {
             country => 'United Kingdom',
 #            other_names => ['Bohemian Balcony'],
         },
+        'West Swindon Library' => {
+            name => 'West Swindon Library',
+            street => 'Whitehill Way',
+            zip => 'SN5 7DL',
+            city => 'Swindon',
+            country => 'United Kingdom',
+#            other_names => ['Bohemian Balcony'],
+        },
      };
 
     return $known_venues;
