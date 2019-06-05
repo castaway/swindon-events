@@ -6,11 +6,11 @@ use Data::Dumper;
 use JSON;
 use URI;
 use URI::QueryParam;
-use LWP::Simple 'get';
+use LWP::UserAgent;
 use DateTime;
 
 ## docs: https://www.cineworld.co.uk/developer/api
-my $api_base = 'http://www.cineworld.com/api/quickbook';
+my $api_base = 'https://www.cineworld.com/api/quickbook';
 my $cineworld_key;
 
 ## what fun, we need to get cinema ids, film ids and date ids, to retrieve performances. NB. Dates are just YYYYMMDD
@@ -23,10 +23,18 @@ sub get_events {
         die "No cineworld key!";
     }
     print $self->_build_uri('cinemas', { full => 'true'}), "\n";
-    print STDERR get($self->_build_uri('cinemas', { full => 'true'}));
+    my $ua = LWP::UserAgent->new(agent => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.97 Safari/537.36 Vivaldi/1.94.1008.44');
+    my $response = $ua->get($self->_build_uri('cinemas', { full => 'true'}));
+    my $result;
+    if($response->is_success) {
+        $result = decode_json($response->decoded_content);
+    } else {
+        print STDERR "Failed to fetch: ", $self->_build_uri('cinemas', { full => 'true'}), " ", $response->status_line, " ", $response->content, "\n";
+    }
+#    print STDERR get($self->_build_uri('cinemas', { full => 'true'}));
 #    my $result = {};
 #    return [];
-    my $result = decode_json(get($self->_build_uri('cinemas', { full => 'true'})));
+#    my $result = decode_json(get($self->_build_uri('cinemas', { full => 'true'})));
     if ($result->{errors}) {
         warn join "\n", @{$result->{errors}};
         return [];
@@ -44,7 +52,15 @@ sub get_events {
                                                      cinema => $cinema->{id} 
                                           });
         print STDERR "Get films: $films_uri\n";
-        my $result = decode_json(get($films_uri));
+        my $response = $ua->get($films_uri);
+        my $result;
+        if($response->is_success) {
+            $result = decode_json($response->decoded_content);
+        } else {
+            print STDERR "Failed to fetch: $films_uri ", $response->status_line, " ", $response->content, "\n";
+        }
+        
+#        my $result = decode_json(get($films_uri));
 
         my $date = DateTime->now(time_zone => 'UTC');
         my $date_end = $date->clone->add(days => 21);
@@ -74,13 +90,31 @@ sub get_events {
                     country => 'United Kingdom',
                     url => $cinema->{cinema_url},
                 };
+                $event->{future_times_delete} = 1;
                 
-                my $perf_content = get($self->_build_uri(
+                my $response = $ua->get($self->_build_uri(
                                            'performances',
                                            { cinema => $cinema->{id}+0,
                                              film   => $film->{edi}+0,
                                              date   => $date->ymd('')+0,
                                            }));
+                my $perf_content;
+                if($response->is_success) {
+                    $perf_content = $response->decoded_content;
+                } else {
+                    print STDERR "Failed to fetch: ", $self->_build_uri(
+                                           'performances',
+                                           { cinema => $cinema->{id}+0,
+                                             film   => $film->{edi}+0,
+                                             date   => $date->ymd('')+0,
+                                           }), " ", $response->status_line, " ", $response->content, "\n";
+                }
+                # $perf_content = get($self->_build_uri(
+                #                            'performances',
+                #                            { cinema => $cinema->{id}+0,
+                #                              film   => $film->{edi}+0,
+                #                              date   => $date->ymd('')+0,
+                #                            }));
                 print Dumper $perf_content;
                 next if !$perf_content;
                 my $result = decode_json($perf_content);

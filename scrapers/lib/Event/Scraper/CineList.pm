@@ -20,10 +20,12 @@ sub get_events {
 
     # {"postcode":"sn13pr","cinemas":[{"name":"Cineworld Swindon - Regent Circus, ","id":"8674","distance":0.76},{"name":"Empire Swindon (Greenbridge), Swindon","id":"8511","distance":1.82},{"name":"Cineworld Swindon - Shaw Ridge, ","id":"8668","distance":2.06},{"name":"Palace Cinema Devizes, Devizes","id":"10494","distance":16.55}]}
 
-    my @swindon_cinemas = ({ id => 8674, name => 'Cineworld Regent Circus' },
-                           { id => 8511, name => 'Empire Greenbridge' },
-                           { id => 8668, name => 'Cineworld Shaw Ridge' });
-
+    my @swindon_cinemas = (
+        # { id => 8674, name => 'Cineworld Regent Circus' },
+        { id => 8511, name => 'Empire Greenbridge' },
+        # { id => 8668, name => 'Cineworld Shaw Ridge' },
+        );
+    
     my %events;
     foreach my $day (0..20) {
         my $start_date = DateTime->now(time_zone => 'Europe/London')->clone->add(days => $day);
@@ -45,6 +47,9 @@ sub get_events {
                 $event->{event_name} = $show->{title};
                 $event->{times} ||= [];
                 $event->{venue} = __PACKAGE__->find_venue($c->{name});
+                ## Allow collector to delete existing (future) events
+                ## for this event/source and recreate them.
+                $event->{future_times_delete} = 1;
                 foreach my $time (@{ $show->{times} }) {
                     my ($hr,$min) = $time =~ /^(\d{2}):(\d{2})$/;
                     my $start = $start_date->clone->set_hour($hr);
@@ -54,6 +59,7 @@ sub get_events {
                 }
             }
         }
+        
     }
 
 #    print Dumper(values %events);

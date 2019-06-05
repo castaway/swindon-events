@@ -166,7 +166,7 @@ foreach my $source (@{$config{Source}}) {
         
         ## what if there are now no times set at all?
         ## remove dupe times!
-        my $db_event = find_or_create_event($schema, $db_venue, $event_data);
+        my $db_event = find_or_create_event($schema, $db_venue, $event_data, $event->{future_times_delete});
         
         $db_event->update({ url => $event->{event_url} });
         $db_event->find_or_create_related('event_categories', $_) for (@{$event_data->{event_categories}});
@@ -198,7 +198,7 @@ foreach my $source (@{$config{Source}}) {
 }
 
 sub find_or_create_event {
-    my ($schema, $db_venue, $event_data) = @_;
+    my ($schema, $db_venue, $event_data, $future_times_delete) = @_;
 
     ## Find an event with matching times/venue, add any missing times
     ## or create new event
@@ -256,6 +256,10 @@ sub find_or_create_event {
         # b) update/create new times
         # c) remove/cascade items in A that didnt get added/updated in B
         # $db_event->times->delete;
+        ## Delete future events if the source allows:
+        if($future_times_delete) {
+            $db_event->times->search({ start_time => { '>=' => $schema->storage->datetime_parser->format_datetime(DateTime->now) } })->delete;
+        }
         ## Should probably eliminate dupe times.. somehow ;)
         
         my %orig_times = map { $_->start_time->iso8601 => $times_rs->format_datetime('start_time', $_->start_time) } ($db_event->times_rs->search({
@@ -367,8 +371,11 @@ sub update_venue {
             # Attempt to get Lat/Lng for postcode, from OS data:
             if($pcode) {
                 $pcode =~ s/\s+//g;
-                $venue->{latitude} ||= $oscodes->{uc ($pcode) }[0];
-                $venue->{longitude} ||= $oscodes->{uc ($pcode) }[1];
+                my $lookup = $schema->resultset('OSCodes')->find({ code => uc ($pcode) });
+                next if !$lookup;
+                $venue->{latitude} ||= $lookup->latitude;
+                $venue->{longitude} ||= $lookup->longitude; 
+                # $oscodes->{uc ($pcode) }[1];
                 ## Enforce skipping of this venue if we have its postcode
                 # but it isnt in SN (oscodes only has SN as loading the whole
                 # thing took up much memory
