@@ -25,84 +25,73 @@ sub get_events {
     
     my %events;
 
-    my $current = $tree->look_down(_tag => 'tr',
-                               sub { $_[0]->as_text =~ /^\d{4} Special Events$/ }
+    my @event_list = $tree->look_down(_tag => 'li',
+                                      class => qr/ecs-event /,
+                                      #sub { $_[0]->attr('class') =~ /ecs-event / }
         );
+    
+    # my $current = $tree->look_down(_tag => 'ul',
+    #                                class => 'ecs-event-list'
+    #                                # sub { $_[0]->as_text =~ /^\d{4} Special Events$/ }
+        
+    #     );
 
     my ($month, $year) ;
-    while($current = $current->right) {
-        last if !$current;
-        my $td = ($current->content_list)[0];
-        if($td->attr('colspan') && $td->attr('colspan') == 3) {
-            # Its probably a month/year string:
-            if($current->as_text =~ /(\w+) (\d{4})/) {
-                $month = $1;
-                $year = $2;
-            }
-            next;
-        }
-        ## Else its 3 cols, day, date, link:
-        my @cols = $current->look_down(_tag => 'td');
-        my $day = $cols[0]->as_text;
-        my $date = $cols[1]->as_text;
-        my $name = ($cols[2]->content_list)[0];
-        $name = ref $name ? $name->as_text : $name;
-        my $link = $cols[2]->look_down(_tag => 'a');
-        $link ||= $cols[2];
-
-        # basic opening times are 11am-4pm (see basic info page)
-        my $date_str = "$month $date, $year";
-        my $date_epoch = parsedate($date_str);
-        my $start_time = DateTime->from_epoch(epoch => $date_epoch, time_zone => 'Europe/London');
-        $start_time->set_hour(11);
-        $start_time->set_minute(0);
-        $start_time->set_second(0);
-        my $end_time = DateTime->from_epoch(epoch => $date_epoch);
-        $end_time->set_hour(16);
-        $end_time->set_minute(0);
-        $end_time->set_second(0);
-
-        if($cols[2]->as_text =~ /(\d{1,2}):(\d{1,2})([ap]m)(?:\s-\s(\d{1,2}):(\d{1,2})([ap]m))?/) {
-            # Either a start time or a start/end
-            my $hour = $3 eq 'pm' && $1 < 12 ? $1 + 12 : $1;
-            $start_time->set_hour($hour);
-            $start_time->set_minute($2);
-            if($4) {
-                my $hour = $6 eq 'pm' && $1 < 12 ? $4 + 12 : $4;
-                $end_time->set_hour($hour);
-                $end_time->set_minute($5);
-            }
-
-            ## Fix default times issue (5pm < 8pm!)
-            if($end_time < $start_time) {
-                $end_time = $start_time->clone->add(hours => 1);
+    foreach my $event_li (@event_list) {
+        my %event;
+        my $link = $event_li->look_down(_tag => 'a');
+        $event{event_name} = $link->as_text;
+        $event{event_url} = $link->attr('href');
+        my $e_time = $event_li->look_down(_tag => 'span',
+                                          class => 'duration time')->as_text;
+        # 24 July @ 11:00 am - 3:04 pm
+        my ($date, $start,$end) = $e_time =~ /(\d+\s+\w+(?:\s+\d{4})?)\s+\@\s+(\d+:\d+\s*[ap]m)\s*-\s*(\d+:\d+\s*[ap]m)/;
+#        my ($date, $start, $startap, $end, $endap) = $e_time =~ /(\d\s+\w+)\s+\@\s+(\d+:\d+)\s*([ap])m\s*-\s*(\d+:\d+)\s*([ap])m/;
+        # if($endap eq 'p' && $end <= 12) {
+        #     $end += 12;
+        # }
+        my ($starttime, $endtime);
+        if($date) {
+            print STDERR "Parsed: $date $start $end from $e_time\n";
+            $starttime = parsedate("$date $start", PREFER_FUTURE => 1);
+            $endtime = parsedate("$date $end", PREFER_FUTURE => 1);
+        } else {
+            # 27 July - 28 July
+            my ($date_start, $date_end) = $e_time =~ /(\d+\s+\w+)\s*-\s*(\d+\s+\w+)/;
+            if(!$date_start) {
+                warn "Can't parse dates from $e_time\n";
+            } else {
+                print STDERR "Parsed: $date_start $date_end from $e_time\n";
+                $starttime = parsedate("$date_start", PREFER_FUTURE => 1);
+                $endtime = parsedate("$date_end", PREFER_FUTURE => 1);
             }
         }
-
-        my $id = $name;
+        
+        $event{times} = [ {
+            start => DateTime->from_epoch(epoch => $starttime, time_zone => 'Europe/London'),
+            end => DateTime->from_epoch(epoch => $endtime, time_zone => 'Europe/London'),
+        }];
+        my $id = $event{event_url};
+        $id =~ s{https://swindon-cricklade-railway.org/event/}{};
         $id =~ s{\s}{}g;
         $id = "schr://$id";
-        if($events{$name}) {
-            push @{ $events{$name}{times} }, {
-                start => $start_time,
-                end => $end_time,
+        if($events{ $event{event_url} }) {
+            push @{ $events{ $event{event_url} }{times} }, {
+                start => $event{times}[0]{start},
+                end => $event{times}[0]{end},
             };
         } else {
-            $events{$name} = {
+            $events{ $event{event_url} } = {
                 event_id => $id,
-                event_name => $name,
-                event_url => $source->{uri},
                 venue => __PACKAGE__->find_venue('Swindon and Cricklade Heritage Railway'),
-                times => [ {
-                    start => $start_time,
-                    end => $end_time,
-                }],
+                %event,
             };
         }
     }
 
-#    print STDERR Data::Dumper::Dumper(values %events);
-    
+    #print STDERR Data::Dumper::Dumper(values %events);
+
+    #return [];
     return [ values %events ];
 }
 
