@@ -68,9 +68,10 @@ sub get_events {
 #                my ($time, $date, $price) = split / • /, $info_para->address('.4');
 
                 # 10am – 4pm 11 May £5 adult • £4 child
+                # 12 noon 12 May £5
                 # date month now optional, as missing from some subparts!
                 my ($hour, $minute, $ampm, $end_hour, $end_min, $end_ampm, $day, $month, $price) = 
-                    $date_str =~ m/(\d+)\.?(\d+)?(am|pm)     # start time
+                    $date_str =~ m/(\d+)\s*\.?(\d+)?(am|pm|noon)  # start time
                               (?:\D+?(\d+)\.?(\d+)?(am|pm))? # - optional end time
                               \D+?(\d+)?\s([A-Z]+)?          # date month
                               (.*)                           # prices
