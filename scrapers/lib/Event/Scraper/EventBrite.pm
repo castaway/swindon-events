@@ -10,10 +10,6 @@ use JSON;
 use DateTime::Format::Strptime;
 ## for venues:
 use base 'Event::Scraper::Website::Swindon';
-
-# Client secret 	 4JFMGGNXK7IQQBZFI66A6PBFTV63GZ74MVITKW6Z2VV55SWZHB 
-# Your personal OAuth token 	 GMUOPLGTS4TAG3IFOHIC 
-# Anonymous access OAuth token 	 MVB5IGEA3EGDWFJONGCG 
  
 my $api_base = 'https://www.eventbriteapi.com/v3';
 my $client_secret;
@@ -22,10 +18,10 @@ my $ua;
 # http://developer.eventbrite.com/docs/auth/, http://www.eventbrite.com/myaccount/apps/
 
 sub get_events {
-    my ($self, $config) = @_;
+    my ($self, $config, $keyconf) = @_;
 
-    $client_secret ||= $config->{secret};
-    $oauth_token ||= $config->{oauth_token};
+    $client_secret ||= $keyconf->{secret};
+    $oauth_token ||= $keyconf->{oauth_token};
 
   #  https://www.eventbriteapi.com/v3/events/search/?token=MVB5IGEA3EGDWFJONGCG&location.latitude=51.559758&location.longitude=-1.781163&location.within=2mi
 # https://www.eventbriteapi.com/v3/events/search/?token=MVB5IGEA3EGDWFJONGCG&venue.city=Swindon&venue.country=GB

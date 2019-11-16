@@ -3,25 +3,30 @@ package Event::Scraper::MeetUp;
 use strict;
 use warnings;
 
+use Moo;
 use LWP::Simple 'get';
 use LWP::UserAgent;
 use DateTime;
 use Data::Dumper;
 use JSON;
 
+with 'Event::OAuthHandler';
+
+has service => (is => 'ro', default => sub {  'meetup' });
+
 my $api_base = 'https://api.meetup.com';
 
 sub get_events {
-    my ($self, $config) = @_;
-    my $api_key = $config->{key};
+    my ($self, $config, $keyconf) = @_;
+    my $access_token = $self->authenticate($keyconf);
 
     ## Find local groups (Swindon + 5mi)
-    my $groups_str = get("$api_base/find/groups?lat=51.5613683&lon=-1.7856853&radius=5&page=50&format=json&sign=true&key=$api_key&page=50");
+    my $groups_str = get("$api_base/find/groups?lat=51.5613683&lon=-1.7856853&radius=5&page=50&format=json&sign=true&access_token=$access_token&page=50");
 #    my $resp = LWP::UserAgent->new()->get("$api_base/find/groups?lat=51.5613683&lon=-1.7856853&radius=5&page=50&format=json&sign=true&key=$api_key");
 #    print $resp->status_line;
 #    print $resp->content;
 #    my $groups_str = $resp->decoded_content;
-    print "$api_base/find/groups?lat=51.5613683&lon=-1.7856853&radius=5&page=50&format=json&sign=true&key=$api_key\n";
+#    print "$api_base/find/groups?lat=51.5613683&lon=-1.7856853&radius=5&page=50&format=json&sign=true&access_token=$access_token\n";
     print Dumper($groups_str);
     my $groups = decode_json($groups_str);
 

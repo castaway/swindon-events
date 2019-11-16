@@ -23,6 +23,7 @@ sub get_events {
     my $dtpday = DateTime::Format::Strptime->new(pattern => '%Y%m%d',
         time_zone => 'Europe/London');
     foreach my $e_row (@$event_objs) {
+        next unless $e_row->ical_entry_type eq 'VEVENT';
         my %event;
 #        print STDERR Data::Dumper::Dumper($e_row->properties);
         my $id = $e_row->property('uid');

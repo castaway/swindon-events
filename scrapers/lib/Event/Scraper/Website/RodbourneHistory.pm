@@ -12,6 +12,7 @@ use DateTime;
 use base 'Event::Scraper::Website::Swindon';
 
 # 29th June 7 to 8pm
+# 25th September
 sub get_events {
     my ($self, $source_info) = @_;
 
@@ -24,7 +25,7 @@ sub get_events {
     foreach my $heading (@headings) {
         my $block = $heading->right();
         next if $block->tag ne 'blockquote';
-        my @times = $heading->as_text =~ /(\d+)(?:th|st|nd|rd)\s+(\w+)\s+(\d+)\s?([ap]m)?\s+to\s+(\d+)\s?([ap]m)?/;
+        my @times = $heading->as_text =~ /(\d+)(?:th|st|nd|rd)\s+(\w+)(?:\s+(\d+)\s?([ap]m)?\s+to\s+(\d+)\s?([ap]m)?)?/;
         next if !@times;
         print STDERR "h4: ", $heading->as_text, "\n";
         my $now = DateTime->now(time_zone => 'Europe/London');
@@ -34,7 +35,10 @@ sub get_events {
         if($times[5] eq 'pm' && $times[4] < 12) {
             $times[4] += 12;
         }
-        my $month = {Janurary => 1,
+        # Assume always evening?
+        $times[2] ||= 19;
+        $times[4] ||= 20;
+        my $month = {January => 1,
                      February => 2,
                      March => 3,
                      April => 4,
