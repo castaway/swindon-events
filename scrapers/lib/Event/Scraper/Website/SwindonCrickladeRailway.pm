@@ -45,23 +45,33 @@ sub get_events {
         my $e_time = $event_li->look_down(_tag => 'span',
                                           class => 'duration time')->as_text;
         # 24 July @ 11:00 am - 3:04 pm
-        my ($date, $start,$end) = $e_time =~ /(\d+\s+\w+(?:\s+\d{4})?)\s+\@\s+(\d+:\d+\s*[ap]m)\s*-\s*(\d+:\d+\s*[ap]m)/;
+        # 21 August @ 10:30 am - 23 August @ 4:30 pm
+        # 31 August @ 10:30 am
+        my ($date, $start,$end) = $e_time =~ /(\d+\s+\w+(?:\s+\d{4})?)\s+\@\s+(\d+:\d+\s*[ap]m)(\s*-\s*((?:\d+\s+\w+(?:\s+\d{4})?\s*\@\s+)?\s*\d+:\d+\s*[ap]m))?/;
 #        my ($date, $start, $startap, $end, $endap) = $e_time =~ /(\d\s+\w+)\s+\@\s+(\d+:\d+)\s*([ap])m\s*-\s*(\d+:\d+)\s*([ap])m/;
         # if($endap eq 'p' && $end <= 12) {
         #     $end += 12;
         # }
         my ($starttime, $endtime);
         if($date) {
-            print STDERR "Parsed: $date $start $end from $e_time\n";
+            $end ||= '';
+            $end =~ s/\@ //;
+            print STDERR "Parsed A: $date $start $end from $e_time\n";
             $starttime = parsedate("$date $start", PREFER_FUTURE => 1);
+            if(!$end) {
+                $end = $start;
+                $end =~ s/\d+:\d+\s(a|p)m/23:50 pm/;
+                print STDERR "Parsed A2: $date $start $end from $e_time\n";
+            }
             $endtime = parsedate("$date $end", PREFER_FUTURE => 1);
         } else {
             # 27 July - 28 July
-            my ($date_start, $date_end) = $e_time =~ /(\d+\s+\w+)\s*-\s*(\d+\s+\w+)/;
+            # 28 March 2020 - 29 March 2020
+            my ($date_start, $date_end) = $e_time =~ /(\d+\s+\w+\s*(?:\d{4})?)\s*-\s*(\d+\s+\w+\s*(?:\d{4})?)/;
             if(!$date_start) {
                 warn "Can't parse dates from $e_time\n";
             } else {
-                print STDERR "Parsed: $date_start $date_end from $e_time\n";
+                print STDERR "Parsed B: $date_start $date_end from $e_time\n";
                 $starttime = parsedate("$date_start", PREFER_FUTURE => 1);
                 $endtime = parsedate("$date_end", PREFER_FUTURE => 1);
             }
