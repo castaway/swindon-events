@@ -647,6 +647,22 @@ If anyone is willing to donate some vouchers or prize's for our raffle of this g
             end_time => DateTime->new(year => 2014, month => 9, day => 13, hour => 17, minute => 30),
             venue => { name => 'Willow-Brook Gardens', country => 'United Kingdom', town => 'Wroughton' },
         },
+        {
+            event_genre => 'Exhibition',
+            event_desc => q{Frank Ernest Quinton. The comprehensive retrospective exhibition of his work will reflect his youth, his war service, and his incredible contribution to local art and local heritage over 60 years},
+            event_name => 'Frank Ernest Quinton Exhibition',
+            event_url => '',
+            start_time => DateTime->new(year => 2021, month => 9, day => 4, hour => 10, minute => 0),
+            end_time => DateTime->new(year => 2021, month => 9, day => 8, hour => 17, minute => 30),
+            venue => {
+                name => 'Brunel Centre',
+                street => '29a The Plaza',
+                city => 'Swindon',
+                zip => 'SN1 1LF',
+                country => 'United Kingdom',
+                other_names => [],
+            },
+        },
         ];
 }
 

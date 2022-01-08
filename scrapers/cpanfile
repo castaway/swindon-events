@@ -1,11 +1,11 @@
-requires 'Data::ICal', '0';
+# requires 'Data::ICal', '0';
 requires 'DBIx::Class', '0';
 requires 'strictures', '0';
 requires 'Data::Dump::Streamer','0';
 requires 'HTML::TreeBuilder','0';
 requires 'LWP::Simple','0';
 requires 'DateTime','0';
-requires 'Facebook::Graph','0';
+#requires 'Facebook::Graph','0';
 requires 'DateTime::Format::ISO8601','0';
 requires 'Time::ParseDate','0';
 requires 'URI','0';
@@ -33,7 +33,10 @@ requires 'Plack::Session::State::Cookie';
 requires 'JSON';
 requires 'Path::Class';
 requires 'LWP::UserAgent';
-requires 'Data::ICal';
-requires 'Date::ICal';
 requires 'Net::Twitter';
-
+requires 'LWP::Authen::OAuth2';
+requires 'Future::Utils';
+requires 'Try::Tiny';
+requires 'Moo';
+requires 'Moo::Role';
+requires 'LWP::ConsoleLogger::Everywhere';

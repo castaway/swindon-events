@@ -33,6 +33,11 @@ sub get_events {
     my @events;
     foreach my $group (@$groups) {
         my $events_str = get("$api_base/$group->{urlname}/events");
+        print Dumper($events_str);
+        if(!$events_str) {
+            warn "Meetup returned empty event info!?\n";
+            next;
+        }
         my $events = decode_json($events_str);
 
         foreach my $m_event (@$events) {

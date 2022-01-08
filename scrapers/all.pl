@@ -31,27 +31,27 @@ my $conf = Config::General->new("events.conf");
 my %config = $conf->getall();
 
 ## Keys
-my $keyconf = Config::General->new("keys.conf");
+my $keyconf = { Config::General->new("keys.conf")->getall() };
 
 ## Coder:
-my $mapquest_key = { $keyconf->getall() }->{Keys}{mapquest_key};
+my $mapquest_key = $keyconf->{Keys}{mapquest_key};
 my $geocoder = Geo::Coder::Mapquest->new(
     apikey => $mapquest_key,
     open => 1,
 );
 my $osmcoder = Geo::Coder::OSM->new();
-my $oscodes = retrieve("oscodes.store");
+# my $oscodes = retrieve("oscodes.store");
 
 ## static maps:
-my $map_image_path = $ENV{EVENTS_HOME}'. '/app/static/images/maps/';
+my $map_image_path = $ENV{EVENTS_HOME}. '/app/static/images/maps/';
 
 ## Plugins
 setmoduledirs('./lib');
 #my @plugin_list = useall('Event::Scraper');
 my @plugin_list = findallmod('Event::Scraper');
-if ($filter) {
-    @plugin_list = grep {$_ =~ /$filter/i} @plugin_list;
-}
+# if ($filter) {
+#     @plugin_list = grep {$_ =~ /$filter/i} @plugin_list;
+# }
 my %plugins = map { my $name = $_; $name =~ s{Event::Scraper::}{}; ( $name => $_) } @plugin_list;
 
 for (values %plugins) {
@@ -77,21 +77,67 @@ $geo_dist->formula('mt');
 foreach my $source (@{$config{Source}}) {
     my $plugin = $plugins{$source->{plugin}};
     if(!$plugin) {
-        warn "Can't find plugin named Event::Scraper::$source->{plugin} for source $source->{name}";
+        # warn "Can't find plugin named Event::Scraper::$source->{plugin} for source $source->{name}";
         next;
     }
 
 #    next unless $source->{plugin} =~ /Beehive/;
 #    next if $source->{plugin} eq 'Facebook';
-    next if $source->{plugin} eq 'Facebook' && $source->{page_id} =~ /\D/;
+#    next if $source->{plugin} eq 'Facebook' && $source->{page_id} =~ /\D/;
     next if $filter && $source->{plugin} !~ /$filter/i;
-#     next if $filter && $source->{name} !~ /$filter/i;
+    # next if $filter && $source->{name} !~ /$filter/i;
 
-    my $events = $plugin->get_events($source, $keyconf);
+    if($source->{is_oo}) {
+        $plugin = $plugin->new();
+    }
+    my $events = $plugin->get_events($source, $keyconf->{Keys}{ $source->{plugin} });
+
+    # some APIs (eg ents24), says dont keep data (for > 1hr)
+    # so we delete all existing before we add
+    if($source->{dont_keep_old_data}) {
+        my $dont_url = $source->{dont_keep_match};
+        # times
+        $schema->resultset('Time')->search_rs(
+            {
+                'event.url' => { '-like' => "$dont_url%" },
+            },
+            {
+                join => 'event',
+            }
+            )->delete;
+        # categories
+        $schema->resultset('EventCategories')->search_rs(
+            {
+                'events.url' => { '-like' => "$dont_url%" },
+            },
+            {
+                join => 'events',
+            }
+            )->delete;
+        # Keep user's starred events (I assume we're re-inserting with same event ids!)
+        # Keep venues..
+        # venues
+        # $schema->resultset('Venue')->search_rs(
+        #     {
+        #         'events.url' => { '-like' => "$dont_url%" },
+        #     },
+        #     {
+        #         join => 'events',
+        #     }
+        #     )->delete;
+        # events
+        $schema->resultset('Event')->search_rs(
+            {
+                'me.url' => { '-like' => "$dont_url%" },
+            },
+            {
+            }
+            )->delete;
+    }
 
     my $ecount = 0;
     foreach my $event (@$events) {
-        print Dumper($event);
+        # print Dumper($event);
 
         ## Skip past events:
         next if $event->{start_time} && $event->{start_time} <= DateTime->now();

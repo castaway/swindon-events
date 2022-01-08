@@ -14,7 +14,7 @@ sub get_events {
 
   my $url = $source_info->{uri};
 
-  Dump($source_info);
+  # Dump($source_info);
   my $html = get($url);
   if(!$html) {
       warn "Can't fetch url: $url";
@@ -24,6 +24,14 @@ sub get_events {
   
   my @ret;
 
+  for my $post_div ($root->look_down(_tag => 'div', class => 'post-xx')) {
+      my $link = $post_div->look_down('class' => 'entry-title')->look_down('_tag' => 'a');
+      my $uri = $link->attr('href');
+      my $title = $link->as_text;
+      my $date = $post_div->look_down('_tag' => 'p')->look_down('_tag' => 'strong')->as_text;
+      # Thursday November 2th 8.30pm
+  }
+  
   for my $table_tag ($root->look_down(_tag => 'table', 'width' => '85%')) {
     print "\n\n\n";
 

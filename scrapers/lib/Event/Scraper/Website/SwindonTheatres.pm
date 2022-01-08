@@ -36,19 +36,23 @@ sub get_events {
     } else {
         die "Failed to get $top_uri, ", $response->status_line;
     }
-    p $top_uri;
+    print  "$top_uri", "\n";
 #    p $page;
     return [] if !$page;
     my ($main_content) = ($page=~m/var articleContext = ({.*?});/s);
     $main_content = encode('utf8', $main_content);
-    my $json_parser = JSON->new->allow_barekey;
+    my $json_parser = JSON->new->allow_barekey->relaxed;
     $json_parser->loose(1);
 
     ## This chunk of JSON doesn't contain an entry for every instance of every event
     ## in fact I think its just one per event, to get the date range, so we need to
     ## visit each page to get all the entries.
-    $main_content = $json_parser->decode($main_content);
-    my @sub_pages = map { URI->new_abs($_->[14], $top_uri)} @{ $main_content->{searchResults} };
+    # p $main_content;
+    $main_content = eval { $json_parser->decode($main_content); };
+    # p $@;
+    p $main_content;
+    return [] if $@;
+    my @sub_pages = map { URI->new_abs($_->[18], $top_uri)} @{ $main_content->{searchResults} };
 
     foreach my $page_uri (@sub_pages) {
         my $s_time = time();
@@ -59,7 +63,7 @@ sub get_events {
         } else {
             die "Failed to get $page_uri, ", $response->status_line;
         }
-        p $page_uri;
+        print "$page_uri", "\n";
 #        p $page;
         next if !$page;
         $s_time = time() - $s_time;

@@ -3,7 +3,7 @@ package Event::Scraper::Website::SwindonCrickladeRailway;
 use strict;
 use warnings;
 
-use LWP::Simple 'get';
+#use LWP::Simple 'get';
 use LWP::UserAgent;
 use HTML::TreeBuilder;
 use Time::ParseDate 'parsedate';
@@ -18,7 +18,13 @@ use base 'Event::Scraper::Website::Swindon';
 sub get_events {
     my ($self, $source) = @_;
 
-    my $content = get($source->{uri});
+    my $ua = LWP::UserAgent->new(agent => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.114 Safari/537.36');
+    my $resp = $ua->get($source->{uri});
+    if (!$resp->is_success) {
+        print STDERR "Fetch failed ", $resp->status_line;
+        return [];
+    }
+    my $content = $resp->decoded_content;
     my $tree = HTML::TreeBuilder->new_from_content($content);
 
     $tree->dump;

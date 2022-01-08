@@ -80,6 +80,9 @@ sub get_events {
     return \@events;
 }
 
+# search API deprecated in Dec 2019 - use venue API instead!? (grr)
+# venues only "by organisation", for which we dont have the ids..?
+# guess we scrape the user ui instead :(
 sub get_page {
     my ($self, $page) = @_;
     $page ||= 1;

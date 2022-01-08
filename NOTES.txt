@@ -1,3 +1,47 @@
+05.10.2021:
+
+export SSH_AUTH_SOCK=/tmp/ssh-zZUHt7Fr9H/agent.16385
+export SSH_CLIENT='86.6.34.4 32794 22'
+export SSH_CONNECTION='86.6.34.4 32794 85.119.82.154 22'
+export SSH_TTY=/dev/pts/3
+
+
+29.08.2021:
+
+https://developers.facebook.com/docs/graph-api/reference/v11.0/group/events
+* approved for groups API feature
+* added to group
+
+https://developers.facebook.com/docs/graph-api/reference/event/
+* users + pages -> only fb marketing partners...
+
+Aug 22nd 8am - 23rd 8am 17.09 kWh
+
+8am-11pm =0.78+0.62+0.64+0.66+0.63+0.62+0.76+0.69+0.68+0.78+0.71+0.71+0.88+1.26+1.20 = 11.62
+11pm-8am =0.82+0.81+0.77+0.75+0.75+0.77+0.80 = 5.47
+
+Economy 10:
+1pm-4pm = 0.62+0.76+0.69
+8pm-10pm = 
+Midnight-5am
+
+21.07.2019:
+
+https://www.visitswindon.org.uk/events ?
+
+
+18.04.2018:
+
+facebook events api now broken - needs app review to work, see also:
+* https://theeventscalendar.com/knowledgebase/ea-fb-privacy-policy/
+* https://developers.facebook.com/bugs/185630995395938/
+
+https://developers.facebook.com/docs/graph-api/reference/page
+https://developers.facebook.com/bugs/185630995395938/
+https://developers.facebook.com/tools/explorer/?method=GET&path=739084309455856%2Fevents&version=v2.12
+
+# new app on Jess' account, but will need more work/review..
+https://developers.facebook.com/apps/872297656306713/fb-login/settings/
 
 https://github.com/toddmotto/echo - lazy image loading
 
