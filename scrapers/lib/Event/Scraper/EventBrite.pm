@@ -11,6 +11,11 @@ use DateTime::Format::Strptime;
 ## for venues:
 use base 'Event::Scraper::Website::Swindon';
  
+my $start_url = 'https://www.eventbrite.co.uk/d/united-kingdom--swindon/all-events/';
+# use this page to get event ids
+# https://www.eventbrite.co.uk/api/v3/destination/events/?event_ids=203690262057,219332688977,220279149867,81945825169,225918316767,213705989367,197847556367,238296861327,225113389207,217010643677,216998988817,147020172293,236699092357,231432901037,232226083467,183951161877,211852826507,175571397777,225116117367,176311671957&expand=event_sales_status,image,primary_venue,saves,ticket_availability,primary_organizer&page_size=20
+
+
 my $api_base = 'https://www.eventbriteapi.com/v3';
 my $client_secret;
 my $oauth_token;

@@ -101,6 +101,7 @@ sub get_events {
             ## start_date Friday 21 Aug 2015 at 6:30pm
 
             $result_hr->{start_date} =~ s{ at }{ - };
+            $result_hr->{start_date} =~ s/Sept/Sep/;
             $result_hr->{start_date} =~ s{(\d{1,2}):(\d{1,2})([ap]m)}{$1.$2 $3}i;
 
 #      p $result_hr;

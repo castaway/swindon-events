@@ -22,6 +22,8 @@ sub parse_schema {
     my @events;
     my $dt_parser = DateTime::Format::Strptime->new(
         pattern => '%FT%TZ',
+        time_zone => 'Europe/London',
+        on_error  => 'croak',
     );
     foreach my $s_event (@html_events) {
         my %event;

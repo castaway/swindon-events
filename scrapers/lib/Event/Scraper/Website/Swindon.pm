@@ -113,6 +113,7 @@ sub venues {
             flags => {
                 is_outside => 1,
             },
+            other_names => ['Town Gardens Bowl '],
         },
         'Central Library' => {
             name => 'Swindon Central Library',
@@ -493,6 +494,7 @@ sub venues {
             country => 'United Kingdom',
             latitude => 51.5792471,
             longitude => -1.7457461,
+            other_names => ['Grange Leisure Centre Recreation Ground']
         },
         'Rat Trap' => {
             name => 'Rat Trap',
@@ -655,7 +657,6 @@ sub venues {
             zip => 'SN1 5BP',
             city => 'Swindon',
             country => 'United Kingdom',
-#            other_names => ['Bohemian Balcony'],
         },
         'The Tuppenny' => {
             name => 'The Tuppenny',
@@ -663,7 +664,6 @@ sub venues {
             zip => 'SN1 4BD',
             city => 'Swindon',
             country => 'United Kingdom',
-#            other_names => ['Bohemian Balcony'],
         },
         'West Swindon Library' => {
             name => 'West Swindon Library',
@@ -671,7 +671,13 @@ sub venues {
             zip => 'SN5 7DL',
             city => 'Swindon',
             country => 'United Kingdom',
-#            other_names => ['Bohemian Balcony'],
+        },
+        'The Hop Inn' => {
+            name => 'The Hop Inn',
+            street => '8 Devizes Road',
+            zip => 'SN1 4BH',
+            city => 'Swindon',
+            country => 'United Kingdom',
         },
      };
 
@@ -710,6 +716,7 @@ sub extract_venue {
                        ( $ven->{url} ? ($ven->{url} => $ven) : () ),
                        map { $_ => $ven } (@{ $ven->{other_names} || [] }) ) }
                      values (%{ venues() }) );
+    $all_names{$_} = venues()->{$_} for keys (%{ venues() });
     foreach my $name (sort { length($b) <=> length($a) } keys %all_names) {
         return $all_names{$name} if($desc =~ /$name/i);
     }

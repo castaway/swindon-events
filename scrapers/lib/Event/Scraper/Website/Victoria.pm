@@ -19,52 +19,44 @@ sub get_events {
 
   my $html = get($url) or die "Couldn't get $url";
   my $root = HTML::TreeBuilder->new_from_content($html);
-  
+  # '2022-8-28T20:30'
+  my $parser = DateTime::Format::Strptime->new(
+      pattern => "%Y-%m-%dT%R", 
+      on_error => 'croak', 
+      time_zone => 'Europe/London');
+
   my @ret;
   #$root->dump;
   
-  my $top_tag = $root->look_down(_tag => 'div', 'id' => 'giggity');
-  for my $child ($top_tag->content_list) {
-      next if $child->attr('_tag') eq 'p';
-#      $child->dump;
-
-      # @0.1.0.5.0.1.0 : top_tag
-      # @0.1.0.5.0.1.0.0.0.0 : image x
-      # @0.1.0.5.0.1.0.0.1.0.0 : date
-      # @0.1.0.5.0.1.0.0.1.1.0 : name x
-      # @0.1.0.5.0.1.0.1.0 : desc x
-      # @0.1.0.5.0.1.0.2.1.0 : band website? <-
-      # @0.1.0.5.0.1.0.3.1.0 : start (doors open) time
-      # @0.1.0.5.0.1.0.4.1.0 : price (needs second-level parsing) <-
-      # FIXME: Some have a tickets link.
+  my @e_divs = $root->look_down(id => 'evcal_list');
+  foreach my $e_div (@e_divs) {
+      my $e_schema = $e_div->look_down('class' => 'evo_event_schema');
+      my $url = $e_schema->look_down(_tag => 'a')->attr('href');
+      my $name = $e_schema->look_down(_tag => 'span')->as_text;
+      my $img = $e_schema->look_down(_tag => 'meta', itemprop => 'image')->attr('content');
+      my $desc = $e_schema->look_down(_tag => 'meta', itemprop => 'description')->attr('content');
+      my $start_str = $e_schema->look_down(_tag => 'meta', itemprop => 'startDate')->attr('content');
+      my $end_str = $e_schema->look_down(_tag => 'meta', itemprop => 'endDate')->attr('content');
       
       my $event;
-      $event->{image} = $child->address('.0.0.0')->attr('src');
-      $event->{image} = URI->new_abs($event->{image}, $url);
-      $event->{event_name} = $child->address('.0.1.1.0')->as_text;
-      $event->{event_desc} = join ('', map {ref $_ ? $_->as_HTML : $_}
-				   $child->address('.1.0')->content_list);
-      if ($child->address('.0.2.1.0')) {
-          my @websites = $child->address('.0.2.1.0')->look_down(_tag => 'a');
-          
-          $event->{event_url} =  @websites ? $websites[0]->attr('href') : $url;
-      }
-      $event->{event_url} ||= $url;
-      $event->{event_url} = URI->new_abs($event->{event_url}, $url);
+      $event->{image_url} = $img;
+      $event->{event_name} = $name;
+      $event->{event_url} = $event->{event_id} = $url;
+      $event->{event_desc} = $desc;
+      $event->{times} = [{ start => $parser->parse_datetime($start_str),
+                           end => $parser->parse_datetime($end_str)}];
 
-      ## This is currently required for the auto-eventid assignment... boo!
-      $event->{start_time} = $self->get_times($child->address('.0.1.0.0')->as_text,
-                                              $child->address('.3.1.0'  )->as_text)->[0]{start};
-#      $event->{times} = $self->get_times($child->address('.0.1.0.0')->as_text,
-#                                         $child->address('.3.1.0'  )->as_text);
       $event->{venue} = { 
           name => 'The Victoria',
           street => '88 Victoria Road',
           zip => 'SN1 3BD',
           country => 'United Kingdom',
       };
-      push @ret, $event;
+      if (!grep { $_->{event_url} eq $event->{event_url}} (@ret)) {
+          push @ret, $event;
+      }
   }
+#  print Data::Dumper::Dumper(\@ret);
   return \@ret;
 }
 
