@@ -94,19 +94,27 @@ sub get_events {
             ## start_date            \"Tue 15 Dec 2015 - 10.30 AM\",
             ## series_data4          \"Sat 5 December - Sun 3 January\",
             ## start_date            \"Sun 3 Jan 2016 - 5.00 PM\",
+            ## start_date           Thursday 27 Oct 2022 at 8:00pm
 
             ## We only have one example of an end_date:
             ## end_date              \"until 7.30 PM\",
 
             ## start_date Friday 21 Aug 2015 at 6:30pm
 
+            warn "DateTime before: $result_hr->{start_date}\n";
             $result_hr->{start_date} =~ s{ at }{ - };
-            $result_hr->{start_date} =~ s/Sept/Sep/;
+            $result_hr->{start_date} =~ s{Sept}{Sep};
             $result_hr->{start_date} =~ s{(\d{1,2}):(\d{1,2})([ap]m)}{$1.$2 $3}i;
 
 #      p $result_hr;
 
-            my $start = $formatter->parse_datetime($result_hr->{start_date});
+            my $start;
+            try {
+                $start = $formatter->parse_datetime($result_hr->{start_date});
+            } catch {
+                warn "Can't parse datetime: $result_hr->{start_date}\n";
+                next;
+            };
             my $link = URI->new_abs($result_hr->{additional_info}, $top_uri);
 
             my ($existing_event) = grep { $_->{event_id} eq $result_hr->{additional_info} }

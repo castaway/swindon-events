@@ -1,23 +1,17 @@
 package Event::Scraper::Website::SwindonFestLiterature;
 
-use strictures 1;
-
-#BEGIN {
-#	 push @INC, sub {
-#	my ($self, $filename) = @_;
-#	my $mod = $filename =~ s!.pm$!!r;
-#	$mod =~ s!/!::!g;
-#	system('cpanm', '-S', $mod);
-#	 };
-#}
+# use strictures 2;
+use strict;
+use warnings;
 
 use LWP::Simple 'get';
 use LWP::UserAgent;
-use HTML::TreeBuilder;
 use DateTime;
 use DateTime::Format::Strptime;
 use feature 'state';
 use Data::Dump::Streamer 'Dump';
+use lib '/usr/src/events/HTML-Tagset/lib';
+use HTML::TreeBuilder;
 
 use base 'Event::Scraper::Website::Swindon';
 
@@ -38,6 +32,7 @@ binmode(STDOUT, ':utf8');
 sub get_events {
 	my ($self, $source_info) = @_;
 
+    $DB::single=1;
     ## From base class
 	state $known_venues = __PACKAGE__->venues();
 
@@ -64,53 +59,107 @@ sub get_events {
 
         if ($html) {
             my $tree = HTML::TreeBuilder->new_from_content($html);
-            ## JMM magic goes here!
 
-            print "WHOLE PAGE TREE\n";
-#		$tree->dump;
-
-            # New layout 2021 - bit sparse on the classes etc!
-            for my $coloured_span ($tree->look_down(_tag => 'span', class => 'color_24')) {
-                next if($coloured_span->parent->tag ne 'p');
-                print "Found entry?\n";
-                # $coloured_span->parent->dump;
-                # name = ALL CAPS, desc - rest
-                my $e = {};                
-                my ($e_name, $e_desc) = $coloured_span->parent->as_text =~ /([A-Z\s]+)\s+.\s+(.*)/;
-                next if !$e_name;
-                $e->{event_name} = $e_name;
-                $e->{event_desc} = $e_desc;
-                my $id = $e_name;
-                $id =~ s/\W//g;
-                $e->{event_id} = $page_url . '#' . $id;
-                # Actual urls later?
-                $e->{event_url} = $page_url;
-
-                my @paras = $coloured_span->parent->right;
-                foreach my $p (@paras) {
-                    $e->{event_desc} .= $p->as_text;
-                    next if $e->{start_time};
-                    # $p->dump;
-                    # print "P: ", $p->as_text, "\n";
-                    my $maybe_time_str = $p->as_text;
-                    $maybe_time_str =~ s/midday/pm/;
-                    my ($hour, $minute, $ampm) = 
-                        $maybe_time_str =~ m/(\d+)\s*\.?(\d+)?(am|pm|noon)  # start time
-                        /xi;
-                    # or warn "Can't parse time-of-day '$maybe_time_str'";
-                    if($hour) {
-                        $minute //= 0;
-                        if (lc $ampm eq 'pm' && $hour < 12) {
-                            $hour += 12;
+            # New layout 2025 - wix fun
+            for my $section ($tree->look_down(_tag => 'section')) {
+                my @event_section = $section->look_down(_tag => 'div', 'data-testid' => 'richTextElement');
+                my $e = {};
+                foreach my $e_section (@event_section) {
+                    my @paras = $e_section->look_down(_tag => 'p');
+                    next if !@paras;
+                    my $p_parent = $paras[0]->parent;
+                    print "Found entry?\n";
+                    # First Paragraph is the event name:
+                    $e->{event_name} = $paras[0]->as_text;
+                    # Last one is the main description
+                    $e->{event_desc} = $paras[-1]->as_text;
+                    # Somewhere in here is an address and a date..
+                    # going to have to guess where!
+                    foreach my $p (@paras[1..$#paras-1]) {
+                        my $text = $p->as_text;
+                        if($text =~ /\sSN\d/) {
+                            # hopefully an address!
+                            $e->{venue_loc} = $text;
                         }
-                        my $start_time = $page_date->clone;
-                        $start_time->set_time_zone('Europe/London');
-                        $start_time->set_hour($hour);
-                        $start_time->set_minute($minute);
-                        $e->{start_time} = $start_time;
+                        if($text =~ /\sMay\s~/) {
+                            # hopefully a date
+                            my ($hour, $minute, $ampm) = $text =~ /(\d{1,2})\.?(\d{1,2})?(pm|am)/;
+                            $minute //= 0;
+                            if (lc $ampm eq 'pm' && $hour < 12) {
+                                $hour += 12;
+                            }
+                            my $start_time = $page_date->clone;
+                            $start_time->set_time_zone('Europe/London');
+                            $start_time->set_hour($hour);
+                            $start_time->set_minute($minute || 0);
+                            $e->{start_time} = $start_time;
+                        }
+                    }
+
+                    if($e->{event_name} && $e->{event_name} ne $e->{event_desc}
+                       && $e->{venue_loc} && $e->{start_time}) {
+                        # The next div is the ticket link:
+                        my $link_div = $p_parent->right;
+                        if($link_div) {
+                            my $a = $link_div->look_down(_tag =>'a');
+                            if($a) {
+                            $e->{event_ticket_url} = $a->attr('href');
+                            }
+                        }
+                        # Then an image:
+                        if($link_div) {
+                            my $image_div = $link_div->right;
+                            if($image_div) {
+                                my $img = $image_div->look_down(_tag => 'img');
+                                if($img) {
+                                    $e->{image_link} = $img->attr('srcset');
+                                }
+                            }
+                        }
+                    } else {
+                        next;
                     }
                 }
-                $e->{venue}{name} = 'Online event';
+                # next if($coloured_span->parent->tag ne 'p');
+                # print "Found entry?\n";
+                # # $coloured_span->parent->dump;
+                # # name = ALL CAPS, desc - rest
+                # my $e = {};                
+                # my ($e_name, $e_desc) = $coloured_span->parent->as_text =~ /([A-Z\s]+)\s+.\s+(.*)/;
+                # next if !$e_name;
+                # $e->{event_name} = $e_name;
+                # $e->{event_desc} = $e_desc;
+                # my $id = $e_name;
+                # $id =~ s/\W//g;
+                # $e->{event_id} = $page_url . '#' . $id;
+                # # Actual urls later?
+                # $e->{event_url} = $page_url;
+
+                # my @paras = $coloured_span->parent->right;
+                # foreach my $p (@paras) {
+                #     $e->{event_desc} .= $p->as_text;
+                #     next if $e->{start_time};
+                #     # $p->dump;
+                #     # print "P: ", $p->as_text, "\n";
+                #     my $maybe_time_str = $p->as_text;
+                #     $maybe_time_str =~ s/midday/pm/;
+                #     my ($hour, $minute, $ampm) = 
+                #         $maybe_time_str =~ m/(\d+)\s*\.?(\d+)?(am|pm|noon)  # start time
+                #         /xi;
+                #     # or warn "Can't parse time-of-day '$maybe_time_str'";
+                #     if($hour) {
+                #         $minute //= 0;
+                #         if (lc $ampm eq 'pm' && $hour < 12) {
+                #             $hour += 12;
+                #         }
+                #         my $start_time = $page_date->clone;
+                #         $start_time->set_time_zone('Europe/London');
+                #         $start_time->set_hour($hour);
+                #         $start_time->set_minute($minute);
+                #         $e->{start_time} = $start_time;
+                #     }
+                # }
+                # $e->{venue}{name} = 'Online event';
                 # Dump($e);
                 push @events, $e;
             }
@@ -202,7 +251,7 @@ sub get_events {
                            lc($page_date->month_name),
                            $page_date->year);
 		$page_url = "http://www.swindonfestivalofliterature.co.uk/${url_part}";
-	}
+    }
 
     return \@events;
 }

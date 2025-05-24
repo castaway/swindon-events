@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Moo;
-use LWP::Simple 'get';
+use LWP::UserAgent;
 use LWP::UserAgent;
 use DateTime;
 use Data::Dumper;
@@ -13,6 +13,7 @@ use JSON;
 with 'Event::OAuthHandler';
 
 has service => (is => 'ro', default => sub {  'meetup' });
+has ua => ( is => 'ro', default => sub { LWP::UserAgent->new() });
 
 my $api_base = 'https://api.meetup.com';
 
@@ -20,6 +21,7 @@ sub get_events {
     my ($self, $config, $keyconf) = @_;
     my $access_token = $self->authenticate($keyconf);
 
+    return [];
     ## Find local groups (Swindon + 5mi)
     my $groups_str = get("$api_base/find/groups?lat=51.5613683&lon=-1.7856853&radius=5&page=50&format=json&sign=true&access_token=$access_token&page=50");
 #    my $resp = LWP::UserAgent->new()->get("$api_base/find/groups?lat=51.5613683&lon=-1.7856853&radius=5&page=50&format=json&sign=true&key=$api_key");
@@ -69,4 +71,67 @@ sub get_events {
 #    print Dumper(\@events);
     return \@events;
 }
+# https://gist.github.com/yosun/5729f99f8a4b14598b73bf211938b8cf
+# query event {
+#   event(id: "276754274") {
+#     title
+#     description
+#     host {
+#       email
+#       name
+#     }
+#     dateTime
+#   }
+# }
+  # query($lat: Float,$lon: Float) {
+  #   findLocation(lat: $lat,lon: $lon) {
+  #     city
+  #     name_string 
+  #   }
+  # }
+  
+  # {"lat":37.774929,"lon":-122.419418}
+# query ($query: String!, $lat: Float!, $lon: Float!, $radius: Int!) {
+#   keywordSearch(
+#     filter: {query: $query, lat: $lat, lon: $lon, radius: $radius, source: EVENTS, eventType: PHYSICAL}
+#   ) {
+#     count
+#     edges {
+#       node {
+#         id
+#         result {
+#           ... on Event {
+#             title
+#             dateTime
+#             eventUrl
+#             onlineVenue {
+#               type
+#               url
+#             }
+#             venue {
+#               id
+#               name
+#               address
+#             }
+#           }
+#         }
+#       }
+#     }
+#   }
+# }
 
+
+# {
+#   "query": "knitting ",
+#   "lat": 37.774929,
+#   "lon": -122.419418,
+#   "radius": 50
+# }
+sub gsql_query {
+    my ($self, $token, @args) = @_;
+    # $self->ua->post(
+    #     'Content-Type' => 'application/json',
+    #     'Authorization' => 'Bearer ' . $token,
+    #     'Content' => $query
+    #     );
+}

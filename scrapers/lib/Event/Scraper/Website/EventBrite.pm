@@ -6,7 +6,7 @@ BEGIN {
 use strict;
 use warnings;
 
-use LWP::Simple; 'get';
+use LWP::Simple;
 use HTML::TreeBuilder;
 use DateTime::Format::Strptime;
 use Time::ParseDate;

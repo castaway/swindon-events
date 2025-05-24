@@ -113,7 +113,7 @@ sub venues {
             flags => {
                 is_outside => 1,
             },
-            other_names => ['Town Gardens Bowl '],
+            other_names => ['Town Gardens Bowl', 'Old Town Bowl, Swindon'],
         },
         'Central Library' => {
             name => 'Swindon Central Library',
@@ -139,15 +139,15 @@ sub venues {
             country => 'United Kingdom',
             other_names => ['Museum & Art Gallery', 'smag'],
         },
-        'STEAM Museum' => {
-            name => 'STEAM Museum',
+        'Steam - Museum of the Great Western Railway' => {
+            name => 'Steam - Museum of the Great Western Railway',
             latitude => 51.56286,
             longitude => -1.79493,
             street => 'Kemble Drive',
             city => 'Swindon',
             zip => 'SN2 2TA',
             country => 'United Kingdom',
-            other_names => ['STEAM', 'The Steam Museum'],
+            other_names => ['STEAM', 'The Steam Museum', 'STEAM Museum'],
             flags => {
                 has_food => 1,
                 has_tea_and_coffee => 1,
@@ -679,6 +679,15 @@ sub venues {
             city => 'Swindon',
             country => 'United Kingdom',
         },
+            # Meadowcroft Community Centre
+            # St. Marks Recreation Ground, Whitehouse Rd, Swindon SN2 1DB
+            # St Marks Tennis Courts
+            # The Tawny Owl Swindon
+            # 88 Victoria Road, SN1 3BD Swindon, United Kingdom (the victoria?)
+            # The Castle Old Town Swindon
+            # 54 Godwin Court, SN1 4BB Swindon, United Kingdom (Bert's books?)
+            # Immanuel United Reformed Church
+            # High Street, Swindon, SN6 7, United Kingdom
      };
 
     return $known_venues;
