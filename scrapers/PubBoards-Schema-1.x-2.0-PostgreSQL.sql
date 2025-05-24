@@ -9,8 +9,6 @@ CREATE TABLE "oscodes" (
   PRIMARY KEY ("code")
 );
 
-DROP TABLE  CASCADE;
-
 
 COMMIT;
 
