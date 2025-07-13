@@ -40,3 +40,6 @@ requires 'Try::Tiny';
 requires 'Moo';
 requires 'Moo::Role';
 requires 'LWP::ConsoleLogger::Everywhere';
+requires 'Getopt::Long';
+requires 'Cwd';
+requires 'Data::GUID';
