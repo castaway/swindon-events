@@ -18,6 +18,9 @@ use Geo::Coder::Mapquest;
 use Geo::Coder::OSM;
 use Geo::UK::Postcode::Regex;
 use Storable 'retrieve';
+use lib '/usr/src/events/HTML-Tagset/lib';
+use HTML::Tagset; # v5
+
 use lib 'lib';
 use lib '../lib';
 #use lib '/usr/src/perl/pubboards/lib';
@@ -187,6 +190,7 @@ foreach my $source (@{$config{Source}}) {
         $event->{times} = [ { start => $event->{start_time}, end => undef} ]
             if(!$event->{times} && $event->{start_time});
 
+        print STDERR Dumper($event->{times});
         ## Don't bother attempting to insert events that already happened:
         my $now = DateTime->now();
         my $event_data = {

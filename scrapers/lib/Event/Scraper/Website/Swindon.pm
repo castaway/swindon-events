@@ -679,6 +679,14 @@ sub venues {
             city => 'Swindon',
             country => 'United Kingdom',
         },
+        'Create Studios' => {
+            name => 'Create Studios',
+            street => 'London Street',
+            # street => '10 Carriage Works, London Street',
+            zip => 'SN1 5FB',
+            city => 'Swindon',
+            country => 'United Kingdom',
+        },
             # Meadowcroft Community Centre
             # St. Marks Recreation Ground, Whitehouse Rd, Swindon SN2 1DB
             # St Marks Tennis Courts

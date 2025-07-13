@@ -1,1 +1,5 @@
 *~
+*#*#
+*.bak
+*Old*.pm
+scrapers/lib/HTML/TreeBuilder.pm

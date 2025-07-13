@@ -19,7 +19,7 @@ requires 'LWP::UserAgent';
 requires 'LWP::MediaTypes';
 requires 'Time::ParseDate';
 requires 'Data::ICal';
-requires 'Date::ICal';
+requires 'Data::ICal::DateTime';
 requires 'Geo::Distance';
 requires 'HTML::TreeBuilder';
 requires 'Module::Find';

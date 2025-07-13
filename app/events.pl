@@ -17,7 +17,8 @@ use DateTime;
 use Time::ParseDate;
 use Data::ICal;
 use Data::ICal::Entry::Event;
-use Date::ICal;
+#use Date::ICal;
+use Data::ICal::DateTime;
 use Geo::Distance;
 
 use Encode;
@@ -383,7 +384,8 @@ sub get_ical {
             $ical_event->add_properties(
                 summary => $event->name,
                 description => $event->description,
-                dtstart => Date::ICal->new( epoch => $time->start_time->epoch)->ical,
+                dtstart => $time->start_time,
+#                dtstart => Date::ICal->new( epoch => $time->start_time->epoch)->ical,
                 );
 
             $ical_event->add_properties(location => join(' ', $event->venue->name//'(no name)', $event->venue->address//'(no address)'))
@@ -396,7 +398,8 @@ sub get_ical {
             $ical_event->add_properties(url => $event->url)
                 if ($event->url);
             
-            $ical_event->add_properties(dtend => Date::ICal->new( epoch => $time->end_time->epoch)->ical)
+            $ical_event->add_properties(dtend => $time->end_time)
+#            $ical_event->add_properties(dtend => Date::ICal->new( epoch => $time->end_time->epoch)->ical)
                 if $time->get_column('end_time');
             
             $ical->add_entry($ical_event);
