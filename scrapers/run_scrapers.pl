@@ -236,8 +236,11 @@ foreach my $source (@{$config{Source}}) {
         next if $already;
 
         # fun with content/newlines + html fields:
-        my $long_desc = sprintf('<p>%s</p>', $event->{event_desc});
-        $long_desc =~ s{\n\n}{</p><p>}g;
+        my $long_desc = $event->{event_desc_html};
+        if(!$long_desc) {
+            $long_desc = sprintf('<p>%s</p>', $event->{event_desc});
+            $long_desc =~ s{\n\n}{</p><p>}g;
+        }
 
         my $ua = LWP::UserAgent->new();
         $ua->agent('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 SwindonGuide');

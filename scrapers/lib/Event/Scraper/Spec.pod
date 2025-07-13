@@ -6,11 +6,17 @@ Each event is a hashref, with keys...
 
 =item event_desc
 
-A long description of the event
+A long description of the event, as plain text (use double-newlines
+for paragraphs), will be wrapped in <p> tags.
+
+=item event_desc_html
+
+This will be preferred over event_desc if it exists.
 
 =item event_id
 
-The id of the event, in the form of a uri.  Feel free to make up a schema that represents this source.
+The id of the event, in the form of a uri.  Feel free to make up a
+schema that represents this source.
 
 =item event_url
 
@@ -24,13 +30,19 @@ A short name for the event.
 
 The id of the person/organisation that created this event on the site that is being scraped.  Probably uses the same schema as the event_id.
 
+Unused when posting to Mobilizon.
+
 =item owner_name
 
 Human-readable name for the same entity as the owner_id.
 
+Unused when posting to Mobilizon. (wonder where it would go!?)
+
 =item start_time
 
-The date & time (if known) that this event begins, as a DateTime object.
+The date & time (if known) that this event begins, as a DateTime
+object. Can be unset, then times are expected to be in the
+<L>/times</L> key.
 
 =item tz_hint
 
@@ -42,13 +54,41 @@ FIXME: This was my idea, over Jess's exception, in the first place, and now I'm 
 
 The last time we noticed the information about this event changing.
 
-=item image_url
+=item event_image
+
+This is a hashref of data:
+
+=over
+
+=item url
 
 The URL of an image representing the gig.
 
+=item width
+
+Width of the image
+
+=item height
+
+Height of the image
+
+=item type
+
+MIME type eg image/png
+
+=item size
+
+Size in bytes of the file
+
+=back
+
 =item venue
 
-Information about the venue the event will be at.  FIXME: This is a hashref in it's own right, document it properly.
+Information about the venue the event will be at.  FIXME: This is a
+hashref in it's own right, document it properly.
+
+A single line of text (and not a hashref) will be assumed to be the
+venue name + address, it will be researched using Nominatim. Add to openstreetmap if missing!
 
 =over
 
@@ -58,7 +98,9 @@ Human-readable name of the venue.
 
 =item id
 
-Optional string representing venue id, if available (if not we'll use "eventy:$count+1"
+Optional string representing venue id, if available (if not we'll use "eventy:$count+1".
+
+Unused for Mobilzon (using nominatim IDs)
 
 =item latitude
 

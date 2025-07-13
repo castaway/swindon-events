@@ -3,3 +3,5 @@
 *.bak
 *Old*.pm
 scrapers/lib/HTML/TreeBuilder.pm
+mobilizon_api/local
+scrapers/local/
