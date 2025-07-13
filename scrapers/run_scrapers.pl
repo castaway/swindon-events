@@ -14,10 +14,13 @@ use Config::General;
 use Module::Find;
 use Try::Tiny;
 use GIS::Distance;
+use JSON;
 #use Geo::Coder::Mapquest;
 use Geo::Coder::OSM;
 # use Geo::UK::Postcode::Regex;
 use Data::GUID;
+use LWP::Simple;
+use LWP::UserAgent;
 #use Storable 'retrieve';
 use lib '/usr/src/events/HTML-Tagset/lib';
 #use HTML::Tagset; # v5
@@ -58,6 +61,9 @@ my $group = $api_client->find_group('Imported Events');
 
 # find known addresses
 my @addresses = @{$api_client->get('address', with => 'count')};
+
+# existing images
+my @medias = @{$api_client->get('media', with => 'count')};
 
 # find existing events
 my $old_events = $api_client->get('event', with => 'count');
@@ -121,10 +127,13 @@ foreach my $source (@{$config{Source}}) {
         if(!$venue_data && !$event->{is_online}) {
             next;
         }
-        die if ref $venue_data;
-        
-        my $known_addr = Event::Scraper::Website::Swindon->find_venue($venue_data);
-        my $addr_str = $known_addr->{name} || $venue_data;
+        my $venue_name = $venue_data;
+        $venue_name = $venue_data->{name} if ref $venue_data;
+        next if !$venue_name;
+
+        # normalise name
+        $venue_data = Event::Scraper::Website::Swindon->find_venue($venue_name);
+        my $addr_str = $venue_data->{name} || $venue_name;
         if(!$addr_str) {
             warn "No Location for this event: $addr_str\n";
             next;
@@ -132,7 +141,9 @@ foreach my $source (@{$config{Source}}) {
 
         my ($address) = grep { $_->{description} && ($_->{description} =~ /$addr_str/ || $addr_str =~ /$_->{description}/)} @addresses;
         if(!$address) {
-            my $lookup = $addr_str;
+            my $lookup = ref $venue_data
+                ? join(', ', $venue_data->{name}, $venue_data->{street}, $venue_data->{zip}, 'Swindon')
+                : $addr_str;
             if($lookup !~ /Swindon/i) {
                 $lookup .= ', Swindon';
             }
@@ -176,6 +187,15 @@ foreach my $source (@{$config{Source}}) {
             }
         }
 
+        # {
+        #   "actor_id": 7618,
+        #   "file": "{\"id\": \"34cd3966-d9fe-4cbe-b2d0-03b742d6cda0\", \"url\": \"https://swindonguide.org.uk/media/e4b44eb21ed958e35c5189948892867445353deb0f61ad35d2832321ffed48e2.jpg?name=19-1400x788.jpg\", \"name\": \"19-1400x788.jpg\", \"size\": 75497, \"updated_at\": \"2025-05-25T12:08:23\", \"inserted_at\": \"2025-05-25T11:57:19\", \"content_type\": \"image/jpeg\"}",
+        #   "id": 4,
+        #   "inserted_at": "2025-05-25 11:57:19",
+        #   "metadata": "{\"width\": 1400, \"height\": 788, \"blurhash\": \"MEA7xh1v$iR*SgNuW:sBsCW;J7xFJ8,@Ez\"}",
+        #   "updated_at": "2025-05-25 12:08:23"
+        # }
+
         $event->{times} = [ { start => $event->{start_time}, end => undef} ]
             if(!$event->{times} && $event->{start_time});
 
@@ -184,47 +204,109 @@ foreach my $source (@{$config{Source}}) {
             next;
         }
 
-        print STDERR Dumper($event->{times});
+        # print STDERR Dumper($event->{times});
 
         my $title = $event->{event_name};
         $title =~ s{\s+$}{};
-        my ($already) = grep { $_->{title} eq $title } @$old_events;
+
+        my $ticket_url = $event->{event_ticket_url} || $event->{event_url};
+        my ($already) = grep { $_->{external_participation_url} eq $ticket_url || $_->{title} eq $title } @$old_events;
         next if $already;
 
         # fun with content/newlines + html fields:
         my $long_desc = sprintf('<p>%s</p>', $event->{event_desc});
         $long_desc =~ s{\n\n}{</p><p>}g;
 
-        my $uuid = lc(Data::GUID->new->as_string);
-        my $event_vars = {
-            title => $title,
-            description => $long_desc,
-            begins_on => $event->{times}[0]{start}->iso8601,
-        ( $event->{times}[0]{end} ? (ends_on => $event->{times}[0]{end}->iso8601) : ()),
-            status => lc($event->{status} || 'confirmed'),
-            visibility => lc($event->{visibility} || 'public'),
-            join_options => 'free',
-            uuid => $uuid,
-            url => $guide_base . 'events/' . $uuid,
-        ( $event->{event_ticket_url} ? (
-              external_participation_url => $event->{event_ticket_url}
-          ) : ()),
-            participant_stats => '{"creator": 1, "rejected": 0, "moderator": 0, "participant": 0, "not_approved": 0, "administrator": 0, "not_confirmed": 0}',
-            # No m2m rel because no PK in eventstag
-            # tags => ['facebook','import'],
-            organizer_actor_id => $actor->{id},
-        ( $address ? ( physical_address_id => $address->{id} ) : ()),
-            attributed_to_id => $group->{id},
-            # max cap 0 = no max cap?
-            # json
-        ( $event->{is_online} ? (options => '{"maximum_attendee_capacity":0,"anonymous_participation":true,"is_online":true}')
-          : (options => '{"maximum_attendee_capacity":0,"anonymous_participation":true}')),
-            # picture_id !?
-        };
-        # options: show_end_time: false (if no end time)
-
-        my $result = $api_client->post('/event', { event => $event_vars});
-        $ecount++;
+        my $ua = LWP::UserAgent->new();
+        $ua->agent('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 SwindonGuide');
+        foreach my $time (@{$event->{times}}) {
+            next if $time->{start} <= DateTime->now();
+            # image:
+            my $pic_id = 0;
+            if($event->{event_image}) {
+                # slightly ugly, file is a jsonb field:
+                my $uri = URI->new($event->{event_image}{url});
+                my $img_name = ($uri->path_segments)[-1];
+                my ($has_media) = grep { $_->{file} =~ /$img_name/ } @medias;
+                if(!$has_media) {
+                    my $filename = lc(Data::GUID->new->as_hex);
+                    my ($ext) = $event->{event_image}{url} =~ /(\.[\w]+)$/;
+                    $filename =~ s/^0x//;
+                    my $url_filename = $filename . $ext;
+                    $filename = $keys->{Config}{uploads_path} . $filename . $ext;
+                    # try/catch? (this doesnt seem to have a fail mode?!)
+                    #getstore($event->{event_image}{url}, $filename);
+                    $ua->get($event->{event_image}{url}, ':content_file' => $filename);
+                    if(!-e $filename) {
+                        warn "Can't store file at $filename\n";
+                        next;
+                    }
+                
+                    my $image_uuid = lc(Data::GUID->new->as_string);
+                    my $media_vars = {
+                        actor_id => $actor->{id},
+                        file => encode_json(
+                            {
+                                id => $image_uuid,
+                                url => 'https://swindonguide.org.uk/media/' . $url_filename,
+                                size => $event->{event_image}{size},
+                                content_type => $event->{event_image}{type},
+                            }),
+                        metadata => encode_json(
+                            {
+                                width => $event->{event_image}{width},
+                                height => $event->{event_image}{height},
+                            }),
+                    };
+                    my $result = $api_client->post('media', { media => $media_vars});
+                    if($result) {
+                        $result->{media}= $result->{media}->[0] if ref $result->{media} eq 'ARRAY';
+                        $pic_id = $result->{media}{id};
+                    }
+                } else {
+                    $pic_id = $has_media->{id};
+                }
+            }
+            my $uuid = lc(Data::GUID->new->as_string);
+            my $options = {
+                show_end_time => $time->{end} ? $JSON::true : $JSON::false,
+                is_online => $event->{is_online} ? $JSON::true : $JSON::false,
+                maximum_attendee_capacity => 0,
+                anonymous_participation => $JSON::true,
+            };
+            my $event_vars = {
+                title => $title,
+                description => $long_desc,
+                begins_on => $time->{start}->iso8601,
+                ends_on => ($time->{end} ? $time->{end}->iso8601 : undef),
+                status => lc($event->{status} || 'confirmed'),
+                visibility => lc($event->{visibility} || 'public'),
+                join_options => 'free',
+                uuid => $uuid,
+                picture_id => $pic_id ? $pic_id : undef,
+                url => $guide_base . 'events/' . $uuid,
+                online_address => $event->{event_url},
+            ( $event->{event_ticket_url} ? (
+                  external_participation_url => $ticket_url
+              ) : ()),
+                participant_stats => '{"creator": 1, "rejected": 0, "moderator": 0, "participant": 0, "not_approved": 0, "administrator": 0, "not_confirmed": 0}',
+                # No m2m rel because no PK in eventstag
+                # tags => ['facebook','import'],
+                organizer_actor_id => $actor->{id},
+            ( $address ? ( physical_address_id => $address->{id} ) : ()),
+                attributed_to_id => $group->{id},
+                # max cap 0 = no max cap?
+                # json
+                options => encode_json($options),
+            # ( $event->{is_online} ? (options => '{"maximum_attendee_capacity":0,"anonymous_participation":true,"is_online":true}')
+            #   : (options => '{"maximum_attendee_capacity":0,"anonymous_participation":true}')),
+                # picture_id !?
+            };
+            # options: show_end_time: false (if no end time)
+            
+            my $result = $api_client->post('/event', { event => $event_vars});
+            $ecount++;
+        }
     }
 
     if(!$ecount) {
@@ -232,3 +314,4 @@ foreach my $source (@{$config{Source}}) {
     }
     # print Dumper($events);
 }
+
