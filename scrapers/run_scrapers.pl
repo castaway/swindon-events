@@ -15,31 +15,37 @@ use Module::Find;
 use Try::Tiny;
 use GIS::Distance;
 use JSON;
-#use Geo::Coder::Mapquest;
 use Geo::Coder::OSM;
-# use Geo::UK::Postcode::Regex;
 use Data::GUID;
 use LWP::Simple;
 use LWP::UserAgent;
-#use Storable 'retrieve';
+use Getopt::Long;
+use Cwd;
 use lib '/usr/src/events/HTML-Tagset/lib';
 #use HTML::Tagset; # v5
 
-use lib '/usr/src/events/scrapers/lib';
-use Event::Scraper::Website::Swindon;
-
 use lib 'lib';
+use Event::Scraper::Website::Swindon;
+use lib '../mobilizon_api/lib';
 use Mobilizon::WebAPI::HAL;
 
-## Provide a param to use only matching sources:
-my $filter = shift;
+## Options:
+my $filter = '';
+my $debug = 0;
+my $dry_run = 0;
+
+GetOptions(
+    dry_run    => \$dry_run,
+    debug      => \$debug,
+    'filter:s' => \$filter,
+) or die "Missing command line args";
 
 ## Config
-my $conf = Config::General->new("/usr/src/events/scrapers/events.conf");
+my $conf = Config::General->new(getcwd() . "/events.conf");
 my %config = $conf->getall();
 
 ## Scraper Keys
-my $keyconf = { Config::General->new("/usr/src/events/scrapers/keys.conf")->getall() };
+my $keyconf = { Config::General->new(getcwd() . "/keys.conf")->getall() };
 
 ## mobi Keys
 my $keys = { Config::General->new("keys.conf")->getall() };
@@ -53,30 +59,33 @@ my $api_client = Mobilizon::WebAPI::HAL->new(
     host => $guide_base,
 );
 
-# import actor:
-my $actor = $api_client->find_actor('Facebook Imports');
+my ($actor, $group, @addresses, @medias, $old_events, $osmcoder);
+if(!$dry_run) {
+    # import actor:
+    $actor = $api_client->find_actor('Facebook Imports');
 
-# import group
-my $group = $api_client->find_group('Imported Events');
+    # import group
+    $group = $api_client->find_group('Imported Events');
 
-# find known addresses
-my @addresses = @{$api_client->get('address', with => 'count')};
+    # find known addresses
+    @addresses = @{$api_client->get('address', with => 'count')};
 
-# existing images
-my @medias = @{$api_client->get('media', with => 'count')};
+    # existing images
+    @medias = @{$api_client->get('media', with => 'count')};
 
-# find existing events
-my $old_events = $api_client->get('event', with => 'count');
+    # find existing events
+    $old_events = $api_client->get('event', with => 'count');
 
-## Coder:
-my $osmcoder = Geo::Coder::OSM->new();
-# my $oscodes = retrieve("oscodes.store");
+    ## Coder:
+    $osmcoder = Geo::Coder::OSM->new();
+    # my $oscodes = retrieve("oscodes.store");
+}
 
 ## static maps:
 #my $map_image_path = $ENV{EVENTS_HOME}. '/app/static/images/maps/';
 
-## Plugins
-setmoduledirs('/usr/src/events/scrapers/lib');
+## Scraper Plugins
+setmoduledirs(getcwd() . '/lib');
 #my @plugin_list = useall('Event::Scraper');
 my @plugin_list = findallmod('Event::Scraper');
 if ($filter) {
@@ -94,7 +103,7 @@ print Dumper \%plugins;
 
 my $swindon_centre = $config{Setup}{centre};
 my $max_dist       = $config{Setup}{max_dist}; #miles
-my $geo_dist       =  GIS::Distance->new();
+my $geo_dist       = GIS::Distance->new();
 
 ## Run
 foreach my $source (@{$config{Source}}) {
@@ -114,9 +123,14 @@ foreach my $source (@{$config{Source}}) {
 
     my $ecount = 0;
     foreach my $event (@$events) {
-        # print Dumper($event);
+        if($debug) {
+            print Dumper($event);
+        }
 
         ## Skip past events:
+        if($debug) {
+            print "Skipping if old: ", $event->{start_time} && $event->{start_time} <= DateTime->now(), "\n";
+        }
         next if $event->{start_time} && $event->{start_time} <= DateTime->now();
         
         my $next_venue_id;
@@ -125,6 +139,9 @@ foreach my $source (@{$config{Source}}) {
 #        $venue_data = $event->{venue} ||  $source->{Venue};
         $venue_data = $event->{venue_loc} || $event->{venue} ||  $source->{Venue};
         if(!$venue_data && !$event->{is_online}) {
+            if($debug) {
+                print "Skipping: No venue data found and not online\n";
+            }
             next;
         }
         my $venue_name = $venue_data;
@@ -135,58 +152,61 @@ foreach my $source (@{$config{Source}}) {
         $venue_data = Event::Scraper::Website::Swindon->find_venue($venue_name);
         my $addr_str = $venue_data->{name} || $venue_name;
         if(!$addr_str) {
-            warn "No Location for this event: $addr_str\n";
+            if($debug) {
+                print "Skipping: No Location for this event: $addr_str\n";
+            }
             next;
         }
 
         my ($address) = grep { $_->{description} && ($_->{description} =~ /$addr_str/ || $addr_str =~ /$_->{description}/)} @addresses;
-        if(!$address) {
-            my $lookup = ref $venue_data
-                ? join(', ', $venue_data->{name}, $venue_data->{street}, $venue_data->{zip}, 'Swindon')
-                : $addr_str;
-            if($lookup !~ /Swindon/i) {
-                $lookup .= ', Swindon';
-            }
-            my $detail = $osmcoder->geocode(
-                location => $lookup
-            );
-            if(!$detail || $detail->{description}) {
-                warn "No nominatim entry for this address: $lookup\n";
-                next;
-            }
-
-            my $dist_from_centre = $geo_dist->distance($swindon_centre->{lat}, $swindon_centre->{lng}, $detail->{lat}, $detail->{lon});
-            if($dist_from_centre->miles > $max_dist) {
-                warn "This place $addr_str seems to be outside of Swindon\n";
-                next;
-            }
-
-            ##  Did we add this nominatim id already?
-            $address = grep { $_->{origin_id} && ($_->{origin_id} eq "nominatim:$detail->{osm_id}") } @addresses;
+        if(!$dry_run) {
             if(!$address) {
-                # create from nominatim, cos the ActiveModel doesnt do cascades (hal+jsonapi do tho)
-                my $result = $api_client->post(
-                    'address',
-                    { address => {
-                        geom => join(';', $detail->{lat}, $detail->{lon}),
-                        description => $detail->{address}{$detail->{class}},
-                        origin_id => 'nominatim:' . $detail->{osm_id},
-                        country => $detail->{address}->{country},
-                        region => $detail->{address}{state},
-                        postal_code => $detail->{address}{postcode},
-                        locality => $detail->{address}{town},
-                        street => $detail->{address}{road},
-                        type => $detail->{class},
-                        url => $guide_base . 'address/' . lc(Data::GUID->new->as_string),
-                      }}
+                my $lookup = ref $venue_data
+                    ? join(', ', $venue_data->{name}, $venue_data->{street}, $venue_data->{zip}, 'Swindon')
+                    : $addr_str;
+                if($lookup !~ /Swindon/i) {
+                    $lookup .= ', Swindon';
+                }
+                my $detail = $osmcoder->geocode(
+                    location => $lookup
                 );
-                if($result) {
-                    push @addresses, $result->{address};
-                    $address = $result->{address};
+                if(!$detail || $detail->{description}) {
+                    warn "No nominatim entry for this address: $lookup\n";
+                    next;
+                }
+
+                my $dist_from_centre = $geo_dist->distance($swindon_centre->{lat}, $swindon_centre->{lng}, $detail->{lat}, $detail->{lon});
+                if($dist_from_centre->miles > $max_dist) {
+                    warn "This place $addr_str seems to be outside of Swindon\n";
+                    next;
+                }
+
+                ##  Did we add this nominatim id already?
+                $address = grep { $_->{origin_id} && ($_->{origin_id} eq "nominatim:$detail->{osm_id}") } @addresses;
+                if(!$address) {
+                    # create from nominatim, cos the ActiveModel doesnt do cascades (hal+jsonapi do tho)
+                    my $result = $api_client->post(
+                        'address',
+                        { address => {
+                            geom => join(';', $detail->{lat}, $detail->{lon}),
+                            description => $detail->{address}{$detail->{class}},
+                            origin_id => 'nominatim:' . $detail->{osm_id},
+                            country => $detail->{address}->{country},
+                            region => $detail->{address}{state},
+                            postal_code => $detail->{address}{postcode},
+                            locality => $detail->{address}{town},
+                            street => $detail->{address}{road},
+                            type => $detail->{class},
+                            url => $guide_base . 'address/' . lc(Data::GUID->new->as_string),
+                          }}
+                    );
+                    if($result) {
+                        push @addresses, $result->{address};
+                        $address = $result->{address};
+                    }
                 }
             }
         }
-
         # {
         #   "actor_id": 7618,
         #   "file": "{\"id\": \"34cd3966-d9fe-4cbe-b2d0-03b742d6cda0\", \"url\": \"https://swindonguide.org.uk/media/e4b44eb21ed958e35c5189948892867445353deb0f61ad35d2832321ffed48e2.jpg?name=19-1400x788.jpg\", \"name\": \"19-1400x788.jpg\", \"size\": 75497, \"updated_at\": \"2025-05-25T12:08:23\", \"inserted_at\": \"2025-05-25T11:57:19\", \"content_type\": \"image/jpeg\"}",
@@ -200,11 +220,13 @@ foreach my $source (@{$config{Source}}) {
             if(!$event->{times} && $event->{start_time});
 
         if(!$event->{times}[0]{start}) {
-            warn "No start time for this event $event->{event_name}!\n";
+            if($debug) {
+                print Dumper($event->{times});
+                print "No start time for this event $event->{event_name}!\n";
+            }
             next;
         }
 
-        # print STDERR Dumper($event->{times});
 
         my $title = $event->{event_name};
         $title =~ s{\s+$}{};
@@ -238,33 +260,39 @@ foreach my $source (@{$config{Source}}) {
                     #getstore($event->{event_image}{url}, $filename);
                     $ua->get($event->{event_image}{url}, ':content_file' => $filename);
                     if(!-e $filename) {
-                        warn "Can't store file at $filename\n";
+                        print "Skipping image: Can't store image file at $filename\n";
                         next;
                     }
-                
-                    my $image_uuid = lc(Data::GUID->new->as_string);
-                    my $media_vars = {
-                        actor_id => $actor->{id},
-                        file => encode_json(
-                            {
-                                id => $image_uuid,
-                                url => 'https://swindonguide.org.uk/media/' . $url_filename,
-                                size => $event->{event_image}{size},
-                                content_type => $event->{event_image}{type},
-                            }),
-                        metadata => encode_json(
-                            {
-                                width => $event->{event_image}{width},
-                                height => $event->{event_image}{height},
-                            }),
-                    };
-                    my $result = $api_client->post('media', { media => $media_vars});
-                    if($result) {
-                        $result->{media}= $result->{media}->[0] if ref $result->{media} eq 'ARRAY';
-                        $pic_id = $result->{media}{id};
+
+                    if(!$dry_run) {
+                        my $image_uuid = lc(Data::GUID->new->as_string);
+                        my $media_vars = {
+                            actor_id => $actor->{id},
+                            file => encode_json(
+                                {
+                                    id => $image_uuid,
+                                    url => 'https://swindonguide.org.uk/media/' . $url_filename,
+                                    size => $event->{event_image}{size},
+                                    content_type => $event->{event_image}{type},
+                                }),
+                            metadata => encode_json(
+                                {
+                                    width => $event->{event_image}{width},
+                                    height => $event->{event_image}{height},
+                                }),
+                        };
+                        my $result = $api_client->post('media', { media => $media_vars});
+                        if($result) {
+                            $result->{media}= $result->{media}->[0] if ref $result->{media} eq 'ARRAY';
+                            $pic_id = $result->{media}{id};
+                        }
                     }
                 } else {
                     $pic_id = $has_media->{id};
+                }
+            } else {
+                if($debug) {
+                    print "Missing event_image URL?\n";
                 }
             }
             my $uuid = lc(Data::GUID->new->as_string);
@@ -303,8 +331,14 @@ foreach my $source (@{$config{Source}}) {
                 # picture_id !?
             };
             # options: show_end_time: false (if no end time)
-            
-            my $result = $api_client->post('/event', { event => $event_vars});
+
+            if($debug) {
+                print "Creating event.. \n";
+                print Dumper($event_vars);
+            }
+            if(!$dry_run) {
+                my $result = $api_client->post('/event', { event => $event_vars});
+            }
             $ecount++;
         }
     }
